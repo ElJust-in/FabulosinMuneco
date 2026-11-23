@@ -1,4 +1,4 @@
-<html data-type="html" data-identifier="6b4b5ff5-baf2-4808-af01-da4e9a19a9a6" data-title="Fabulosín vs La Mugre" data-version="5" width="1200" height="700">
+<html data-type="html" data-identifier="6b4b5ff5-baf2-4808-af01-da4e9a19a9a6" data-title="Fabulosín vs La Mugre" data-version="6" width="1200" height="700">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -74,7 +74,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 30px;
+            font-size: 32px;
         }
         .bars {
             flex-grow: 1;
@@ -270,7 +270,7 @@
     <!-- PANTALLA 1: Inicio y Activación de Cámara -->
     <div class="overlay-screen" id="screen-welcome">
         <h1 class="title" id="t-welcome">FABULOSÍN VS LA MUGRE</h1>
-        <p class="subtitle" id="st-welcome">¡Combate callejero mano a mano! Controla a Fabulosín con tus propios gestos frente a tu cámara y desinfecta el ring.</p>
+        <p class="subtitle" id="st-welcome">¡Combate mano a mano en escala gigante! Mueve a Fabulosín con tu mano y libera ráfagas aromáticas para limpiar el ring.</p>
         <button class="btn" id="btn-start-camera">ACTIVAR CÁMARA Y CALIBRAR</button>
         <p style="margin-top: 15px; font-size: 14px; color: #a593c2; font-family: sans-serif;" id="p-fallback-info">
             * Con mouse: Mantén presionado el clic para mover; suelta el clic para atacar.
@@ -286,12 +286,12 @@
             <div class="gesture-card">
                 <div class="icon">🤏</div>
                 <div class="title" id="gc1-title">Pellizco = Mover Personaje</div>
-                <div class="desc" id="gc1-desc">Junta las yemas de tu pulgar e índice. Mientras mantengas el pellizco, Fabulosín seguirá tu mano. Si abres o relajas la mano, se queda en su lugar.</div>
+                <div class="desc" id="gc1-desc">Junta las yemas del pulgar y el índice. Mientras mantengas el pellizco, Fabulosín seguirá tu mano. Si abres o relajas la mano, se detiene.</div>
             </div>
             <div class="gesture-card">
                 <div class="icon">🖐️</div>
                 <div class="title" id="gc2-title">Abrir Mano = ¡Ataque Fabuloso!</div>
-                <div class="desc" id="gc2-desc">Abre la mano extendiendo los dedos para lanzar el barrido con el trapeador. Vuelve a pellizcar para moverte y preparar el siguiente golpe.</div>
+                <div class="desc" id="gc2-desc">Abre la mano extendiendo los dedos para lanzar el barrido con el mop. Vuelve a pellizcar para moverte y preparar el siguiente golpe.</div>
             </div>
         </div>
 
@@ -444,20 +444,20 @@
     let countdownScale = 1;
 
     // Control de gestos
-    let isPinchingControl = false; // Solo se mueve si es true (pellizco)
-    let attackArmed = false;       // Se arma al pellizcar, se dispara al abrir la mano
+    let isPinchingControl = false;
+    let attackArmed = false;
 
     // Partículas
     let particles = [];
 
-    // --- PERSONAJES (20% MÁS GRANDES, SIN CUERDAS NI CRUCETAS) ---
+    // --- PERSONAJES AL DOBLE DE TAMAÑO (200% ESCALA) ---
     const Puppet1 = {
         x: 280,
-        y: 475,
+        y: 610, // Apoyado sobre el ring
         targetX: 280,
-        // Dimensiones aumentadas un 20% (170 -> 204, 230 -> 276)
-        width: 204,
-        height: 276,
+        // Doble de tamaño: 340 x 460
+        width: 340,
+        height: 460,
         hp: 100,
         state: 'idle', // 'idle', 'attack', 'hurt', 'defeated'
         stateTimer: 0,
@@ -466,7 +466,6 @@
             ctx.save();
             ctx.translate(this.x, this.y);
 
-            // Seleccionar sprite según el estado
             let imgToDraw = AssetManager.images['fabulosin_idle'];
             if (this.state === 'attack') {
                 imgToDraw = AssetManager.images['fabulosin_attack'] || imgToDraw;
@@ -474,44 +473,41 @@
                 imgToDraw = AssetManager.images['fabulosin_hurt'] || imgToDraw;
             }
 
-            // Si está derrotado, queda tumbado en la lona
+            // Si está derrotado, yace en la lona
             if (this.state === 'defeated') {
                 ctx.rotate(Math.PI / 2.2);
-                ctx.translate(35, -30);
+                ctx.translate(60, -45);
             } else {
-                // Suave animación de balanceo / respiración
-                const sway = Math.sin(Date.now() * 0.005) * 0.03;
+                const sway = Math.sin(Date.now() * 0.005) * 0.025;
                 ctx.rotate(sway);
             }
 
             // Sombra bajo el personaje
             if (this.state !== 'defeated') {
                 ctx.save();
-                ctx.scale(1, 0.3);
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+                ctx.scale(1, 0.28);
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
                 ctx.beginPath();
-                ctx.arc(0, 30, this.width * 0.38, 0, Math.PI * 2);
+                ctx.arc(0, 40, this.width * 0.38, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.restore();
             }
 
-            // Dibujar imagen 20% más grande directamente
+            // Dibujar imagen al doble de tamaño
             if (imgToDraw && imgToDraw.complete && imgToDraw.naturalWidth > 0) {
-                ctx.drawImage(imgToDraw, -this.width / 2, -this.height + 25, this.width, this.height);
+                ctx.drawImage(imgToDraw, -this.width / 2, -this.height + 40, this.width, this.height);
             } else {
-                // Respaldo geométrico si la imagen tarda en cargar
                 ctx.fillStyle = '#9b4dca';
-                ctx.fillRect(-45, -145, 90, 135);
+                ctx.fillRect(-75, -240, 150, 220);
                 ctx.fillStyle = '#ffe0bd';
                 ctx.beginPath();
-                ctx.arc(0, -170, 32, 0, Math.PI * 2);
+                ctx.arc(0, -280, 50, 0, Math.PI * 2);
                 ctx.fill();
             }
 
             ctx.restore();
         },
         update() {
-            // Suavizado hacia la posición destino
             this.x += (this.targetX - this.x) * 0.15;
 
             if (this.stateTimer > 0) {
@@ -532,14 +528,14 @@
             this.attackCooldown = 20;
 
             AudioEngine.playAttackSwipe();
-            spawnAttackBurst(this.x + 50, this.y - 85);
+            spawnAttackBurst(this.x + 80, this.y - 140);
 
-            // Verificar golpe a La Mugre (rango ajustado al nuevo tamaño)
+            // Rango de golpe duplicado acorde a las nuevas dimensiones
             const distance = Math.abs(Puppet2.x - this.x);
-            if (distance < 340) {
+            if (distance < 440) {
                 Puppet2.takeDamage(16);
-                spawnHitParticles(Puppet2.x - 25, Puppet2.y - 85, '#00e5ff', 18);
-                spawnHitParticles(Puppet2.x - 25, Puppet2.y - 85, '#d1b3ff', 18);
+                spawnHitParticles(Puppet2.x - 40, Puppet2.y - 140, '#00e5ff', 22);
+                spawnHitParticles(Puppet2.x - 40, Puppet2.y - 140, '#d1b3ff', 22);
             }
         },
         takeDamage(amount) {
@@ -559,17 +555,16 @@
 
     const Puppet2 = {
         x: 920,
-        y: 475,
+        y: 610, // Apoyado sobre el ring
         targetX: 920,
-        // Dimensiones aumentadas un 20% (180 -> 216, 230 -> 276)
-        width: 216,
-        height: 276,
+        // Doble de tamaño: 360 x 460
+        width: 360,
+        height: 460,
         hp: 100,
         state: 'idle', // 'idle', 'hurt', 'defeated', 'laughing'
         stateTimer: 0,
         aiTimer: 0,
         render(ctx) {
-            // Si es derrotada por completo, no se dibuja (se disuelve)
             if (this.state === 'defeated') return;
 
             ctx.save();
@@ -582,32 +577,32 @@
 
             // Si está riendo victoriosa, rebota y baila en el ring
             if (this.state === 'laughing') {
-                const bounce = Math.abs(Math.sin(Date.now() * 0.012)) * 30;
+                const bounce = Math.abs(Math.sin(Date.now() * 0.012)) * 36;
                 ctx.translate(0, -bounce);
             } else {
-                const sway = Math.sin(Date.now() * 0.006 + 1.5) * 0.04;
+                const sway = Math.sin(Date.now() * 0.006 + 1.5) * 0.035;
                 ctx.rotate(sway);
             }
 
             // Sombra bajo el personaje
             ctx.save();
-            ctx.scale(1, 0.3);
+            ctx.scale(1, 0.28);
             ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
             ctx.beginPath();
-            ctx.arc(0, 30, this.width * 0.4, 0, Math.PI * 2);
+            ctx.arc(0, 40, this.width * 0.4, 0, Math.PI * 2);
             ctx.fill();
             ctx.restore();
 
-            // Dibujar La Mugre orientada a la izquierda (scale -1) y 20% más grande
+            // Dibujar La Mugre orientada a la izquierda y al doble de tamaño
             if (imgToDraw && imgToDraw.complete && imgToDraw.naturalWidth > 0) {
                 ctx.scale(-1, 1);
-                ctx.drawImage(imgToDraw, -this.width / 2, -this.height + 25, this.width, this.height);
+                ctx.drawImage(imgToDraw, -this.width / 2, -this.height + 40, this.width, this.height);
             } else {
                 ctx.fillStyle = '#4a3319';
-                ctx.fillRect(-50, -135, 100, 120);
+                ctx.fillRect(-85, -230, 170, 200);
                 ctx.fillStyle = '#2c1e0f';
                 ctx.beginPath();
-                ctx.arc(0, -165, 36, 0, Math.PI * 2);
+                ctx.arc(0, -270, 55, 0, Math.PI * 2);
                 ctx.fill();
             }
 
@@ -627,15 +622,15 @@
             if (gameState === 'playing' && this.hp > 0) {
                 this.aiTimer++;
                 if (this.aiTimer % 55 === 0) {
-                    const randomDist = 200 + Math.random() * 130;
-                    this.targetX = Math.max(540, Math.min(1060, Puppet1.x + randomDist));
+                    const randomDist = 260 + Math.random() * 160;
+                    this.targetX = Math.max(540, Math.min(1080, Puppet1.x + randomDist));
                 }
 
-                if (this.aiTimer % 95 === 0 && Math.abs(Puppet1.x - this.x) < 320) {
+                if (this.aiTimer % 95 === 0 && Math.abs(Puppet1.x - this.x) < 420) {
                     AudioEngine.playHit();
-                    spawnHitParticles(this.x - 30, this.y - 80, '#5a3d28', 12);
+                    spawnHitParticles(this.x - 50, this.y - 140, '#5a3d28', 16);
                     Puppet1.takeDamage(13);
-                    spawnHitParticles(Puppet1.x, Puppet1.y - 80, '#ff416c', 14);
+                    spawnHitParticles(Puppet1.x, Puppet1.y - 140, '#ff416c', 18);
                 }
             }
         },
@@ -649,8 +644,8 @@
 
             if (this.hp <= 0) {
                 this.state = 'defeated';
-                spawnHitParticles(this.x, this.y - 100, '#5a3d28', 35);
-                spawnHitParticles(this.x, this.y - 100, '#00e5ff', 35);
+                spawnHitParticles(this.x, this.y - 160, '#5a3d28', 45);
+                spawnHitParticles(this.x, this.y - 160, '#00e5ff', 45);
                 endMatch(true); // Gana Fabulosín
             }
         }
@@ -661,9 +656,9 @@
         for (let i = 0; i < count; i++) {
             particles.push({
                 x, y,
-                vx: (Math.random() - 0.5) * 12,
-                vy: (Math.random() - 0.5) * 12,
-                radius: 3 + Math.random() * 5,
+                vx: (Math.random() - 0.5) * 14,
+                vy: (Math.random() - 0.5) * 14,
+                radius: 4 + Math.random() * 6,
                 color: color,
                 alpha: 1,
                 life: 1
@@ -672,12 +667,12 @@
     }
 
     function spawnAttackBurst(x, y) {
-        for (let i = 0; i < 26; i++) {
+        for (let i = 0; i < 30; i++) {
             particles.push({
                 x, y,
-                vx: 3 + Math.random() * 8,
-                vy: (Math.random() - 0.5) * 7,
-                radius: 4 + Math.random() * 6,
+                vx: 4 + Math.random() * 10,
+                vy: (Math.random() - 0.5) * 9,
+                radius: 5 + Math.random() * 7,
                 color: Math.random() > 0.4 ? '#00e5ff' : '#d1b3ff',
                 alpha: 1,
                 life: 0.95
@@ -806,7 +801,7 @@
             titleEl.style.color = '#ff416c';
             msgEl.textContent = 'Fabulosín ha caído. ¡Limpia la mugre en la revancha!';
             Puppet1.state = 'defeated';
-            Puppet2.state = 'laughing'; // La Mugre permanece en el ring victoriosa
+            Puppet2.state = 'laughing'; // La Mugre permanece en el ring riéndose
             AudioEngine.speak("¡La Mugre domina!");
         }
 
@@ -853,10 +848,10 @@
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             ctx.fillStyle = '#3e2723';
-            ctx.fillRect(80, 480, 1040, 180);
+            ctx.fillRect(60, 520, 1080, 160);
             ctx.strokeStyle = '#5d4037';
             ctx.lineWidth = 6;
-            ctx.strokeRect(80, 480, 1040, 180);
+            ctx.strokeRect(60, 520, 1080, 160);
         }
 
         Puppet1.update();
@@ -901,7 +896,8 @@
 
                 const pinchMidX = (landmarks[4].x + landmarks[8].x) / 2;
                 const handX = (1 - pinchMidX) * canvas.width;
-                Puppet1.targetX = Math.max(160, Math.min(1040, handX));
+                // Margen ampliado para personajes gigantes
+                Puppet1.targetX = Math.max(180, Math.min(1020, handX));
 
                 pipStatus.textContent = "🤏 MOVIENDO PERSONAJE";
                 pipStatus.style.color = "#00e5ff";
@@ -978,14 +974,14 @@
             isMouseDown = true;
             isPinchingControl = true;
             const rect = canvas.getBoundingClientRect();
-            Puppet1.targetX = Math.max(160, Math.min(1040, ((e.clientX - rect.left) / rect.width) * canvas.width));
+            Puppet1.targetX = Math.max(180, Math.min(1020, ((e.clientX - rect.left) / rect.width) * canvas.width));
         }
     });
 
     window.addEventListener('mousemove', (e) => {
         if (isMouseDown) {
             const rect = canvas.getBoundingClientRect();
-            Puppet1.targetX = Math.max(160, Math.min(1040, ((e.clientX - rect.left) / rect.width) * canvas.width));
+            Puppet1.targetX = Math.max(180, Math.min(1020, ((e.clientX - rect.left) / rect.width) * canvas.width));
         }
     });
 
