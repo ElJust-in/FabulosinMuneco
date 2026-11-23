@@ -1,363 +1,366 @@
-<html data-type="html" data-identifier="f8b49893-cfbe-4154-8635-0a6ab0dbd810" data-title="Fabulosín vs La Mugre: Lucha de Marionetas" data-version="5" width="1024" height="700"><head>
-<!-- MediaPipe Hands & Camera Utils -->
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Fabulosín vs La Mugre: Lucha de Marionetas</title>
+  <!-- MediaPipe Hands & Camera Utils -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
 
-<style>
-  * {
-    box-sizing: border-box;
-    user-select: none;
-    margin: 0;
-    padding: 0;
-  }
-  body {
-    background: #0f051d;
-    color: #fff;
-    font-family: 'Impact', 'Trebuchet MS', sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    overflow: hidden;
-  }
-  #game-container {
-    position: relative;
-    width: 1000px;
-    height: 650px;
-    background: #000;
-    border: 8px solid #d97706;
-    border-radius: 12px;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.85), 0 0 35px rgba(217, 119, 6, 0.4);
-    overflow: hidden;
-  }
-  canvas#gameCanvas {
-    display: block;
-    width: 100%;
-    height: 100%;
-  }
+  <style>
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background: #0f051d;
+      color: #fff;
+      font-family: 'Impact', 'Trebuchet MS', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+    #game-container {
+      position: relative;
+      width: 1000px;
+      height: 650px;
+      background: #000;
+      border: 8px solid #d97706;
+      border-radius: 12px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.85), 0 0 35px rgba(217, 119, 6, 0.4);
+      overflow: hidden;
+    }
+    canvas#gameCanvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
 
-  /* Webcam PiP (Picture-in-Picture) */
-  #webcam-panel {
-    position: absolute;
-    top: 55px;
-    left: 18px;
-    width: 190px;
-    height: 142px;
-    background: rgba(15, 7, 30, 0.92);
-    border: 2px solid #a855f7;
-    border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.7), 0 0 10px rgba(168, 85, 247, 0.4);
-    overflow: hidden;
-    z-index: 40;
-    display: flex;
-    flex-direction: column;
-  }
-  .pip-header {
-    background: #4c1d95;
-    padding: 3px 6px;
-    font-size: 10px;
-    color: #fef08a;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    letter-spacing: 0.5px;
-    font-family: monospace;
-  }
-  .pip-feed-container {
-    position: relative;
-    flex: 1;
-    background: #000;
-  }
-  #webcam-video {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transform: scaleX(-1);
-    opacity: 0.85;
-  }
-  #handCanvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    transform: scaleX(-1);
-    pointer-events: none;
-  }
-  .pip-status {
-    position: absolute;
-    bottom: 2px;
-    left: 4px;
-    right: 4px;
-    font-family: monospace;
-    font-size: 9px;
-    color: #4ade80;
-    background: rgba(0,0,0,0.75);
-    padding: 2px 4px;
-    border-radius: 3px;
-    display: flex;
-    justify-content: space-between;
-  }
+    /* Webcam PiP (Picture-in-Picture) */
+    #webcam-panel {
+      position: absolute;
+      top: 55px;
+      left: 18px;
+      width: 190px;
+      height: 142px;
+      background: rgba(15, 7, 30, 0.92);
+      border: 2px solid #a855f7;
+      border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.7), 0 0 10px rgba(168, 85, 247, 0.4);
+      overflow: hidden;
+      z-index: 40;
+      display: flex;
+      flex-direction: column;
+    }
+    .pip-header {
+      background: #4c1d95;
+      padding: 3px 6px;
+      font-size: 10px;
+      color: #fef08a;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      letter-spacing: 0.5px;
+      font-family: monospace;
+    }
+    .pip-feed-container {
+      position: relative;
+      flex: 1;
+      background: #000;
+    }
+    #webcam-video {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+      opacity: 0.85;
+    }
+    #handCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      transform: scaleX(-1);
+      pointer-events: none;
+    }
+    .pip-status {
+      position: absolute;
+      bottom: 2px;
+      left: 4px;
+      right: 4px;
+      font-family: monospace;
+      font-size: 9px;
+      color: #4ade80;
+      background: rgba(0,0,0,0.75);
+      padding: 2px 4px;
+      border-radius: 3px;
+      display: flex;
+      justify-content: space-between;
+    }
 
-  /* UI Overlay */
-  .ui-layer {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-  }
-  .hud-top {
-    position: absolute;
-    top: 15px;
-    left: 20px;
-    right: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-  }
-  .fighter-card {
-    display: flex;
-    flex-direction: column;
-    width: 360px;
-  }
-  .fighter-card.right {
-    align-items: flex-end;
-  }
-  .fighter-name-badge {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 20px;
-    letter-spacing: 1.5px;
-    text-shadow: 2px 2px 0 #000;
-    margin-bottom: 4px;
-  }
-  .player-name {
-    color: #c084fc;
-  }
-  .enemy-name {
-    color: #f87171;
-  }
-  .bar-container {
-    width: 100%;
-    height: 22px;
-    background: #27272a;
-    border: 3px solid #f59e0b;
-    border-radius: 6px;
-    overflow: hidden;
-    position: relative;
-    box-shadow: inset 0 2px 5px rgba(0,0,0,0.8);
-  }
-  .hp-fill {
-    height: 100%;
-    width: 100%;
-    transition: width 0.15s ease-out;
-  }
-  #player-hp {
-    background: linear-gradient(90deg, #9333ea, #c084fc, #38bdf8);
-  }
-  #enemy-hp {
-    background: linear-gradient(90deg, #ef4444, #f97316, #eab308);
-    float: right;
-  }
-  .center-banner {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  .round-timer {
-    background: #b45309;
-    color: #fef08a;
-    font-size: 28px;
-    padding: 2px 14px;
-    border: 3px solid #fef08a;
-    border-radius: 8px;
-    text-shadow: 2px 2px 0 #000;
-  }
+    /* UI Overlay */
+    .ui-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+    .hud-top {
+      position: absolute;
+      top: 15px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .fighter-card {
+      display: flex;
+      flex-direction: column;
+      width: 360px;
+    }
+    .fighter-card.right {
+      align-items: flex-end;
+    }
+    .fighter-name-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 20px;
+      letter-spacing: 1.5px;
+      text-shadow: 2px 2px 0 #000;
+      margin-bottom: 4px;
+    }
+    .player-name {
+      color: #c084fc;
+    }
+    .enemy-name {
+      color: #f87171;
+    }
+    .bar-container {
+      width: 100%;
+      height: 22px;
+      background: #27272a;
+      border: 3px solid #f59e0b;
+      border-radius: 6px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.8);
+    }
+    .hp-fill {
+      height: 100%;
+      width: 100%;
+      transition: width 0.15s ease-out;
+    }
+    #player-hp {
+      background: linear-gradient(90deg, #9333ea, #c084fc, #38bdf8);
+    }
+    #enemy-hp {
+      background: linear-gradient(90deg, #ef4444, #f97316, #eab308);
+      float: right;
+    }
+    .center-banner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .round-timer {
+      background: #b45309;
+      color: #fef08a;
+      font-size: 28px;
+      padding: 2px 14px;
+      border: 3px solid #fef08a;
+      border-radius: 8px;
+      text-shadow: 2px 2px 0 #000;
+    }
 
-  /* Combat & Victory Announcer */
-  #announcer-text {
-    position: absolute;
-    top: 36%;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(0);
-    font-size: 52px;
-    font-weight: bold;
-    color: #facc15;
-    text-shadow: 4px 4px 0 #b91c1c, -2px -2px 0 #000;
-    text-align: center;
-    transition: transform 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    white-space: nowrap;
-    z-index: 50;
-  }
-  #announcer-text.show {
-    transform: translate(-50%, -50%) scale(1);
-  }
-  #announcer-text.victory-phrase {
-    font-size: 58px;
-    color: #fef08a;
-    text-shadow: 4px 4px 0 #7e22ce, -2px -2px 0 #000;
-    animation: pulseVictory 0.6s infinite alternate;
-  }
-  @keyframes pulseVictory {
-    from { transform: translate(-50%, -50%) scale(1); }
-    to { transform: translate(-50%, -50%) scale(1.08); }
-  }
+    /* Combat & Victory Announcer */
+    #announcer-text {
+      position: absolute;
+      top: 36%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      font-size: 52px;
+      font-weight: bold;
+      color: #facc15;
+      text-shadow: 4px 4px 0 #b91c1c, -2px -2px 0 #000;
+      text-align: center;
+      transition: transform 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      white-space: nowrap;
+      z-index: 50;
+    }
+    #announcer-text.show {
+      transform: translate(-50%, -50%) scale(1);
+    }
+    #announcer-text.victory-phrase {
+      font-size: 56px;
+      color: #fef08a;
+      text-shadow: 4px 4px 0 #7e22ce, -2px -2px 0 #000;
+      animation: pulseVictory 0.6s infinite alternate;
+    }
+    @keyframes pulseVictory {
+      from { transform: translate(-50%, -50%) scale(1); }
+      to { transform: translate(-50%, -50%) scale(1.08); }
+    }
 
-  /* Bottom Controls HUD */
-  .hud-bottom {
-    position: absolute;
-    bottom: 12px;
-    left: 20px;
-    right: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-  }
-  .gestures-guide {
-    background: rgba(15, 7, 30, 0.88);
-    border: 2px solid #d97706;
-    padding: 8px 14px;
-    border-radius: 8px;
-    font-family: 'Segoe UI', sans-serif;
-    font-size: 12px;
-    color: #fef08a;
-    display: flex;
-    gap: 14px;
-    pointer-events: auto;
-  }
-  .gesture-pill {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(88, 28, 135, 0.6);
-    padding: 3px 8px;
-    border-radius: 12px;
-    border: 1px solid #a855f7;
-  }
+    /* Bottom Controls HUD */
+    .hud-bottom {
+      position: absolute;
+      bottom: 12px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    .gestures-guide {
+      background: rgba(15, 7, 30, 0.88);
+      border: 2px solid #d97706;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-family: 'Segoe UI', sans-serif;
+      font-size: 12px;
+      color: #fef08a;
+      display: flex;
+      gap: 14px;
+      pointer-events: auto;
+    }
+    .gesture-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(88, 28, 135, 0.6);
+      padding: 3px 8px;
+      border-radius: 12px;
+      border: 1px solid #a855f7;
+    }
 
-  /* Modals */
-  .modal-overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(12, 4, 25, 0.94);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 100;
-    pointer-events: auto;
-    padding: 24px;
-    text-align: center;
-  }
-  .modal-title {
-    font-size: 36px;
-    color: #f59e0b;
-    text-shadow: 3px 3px 0 #7c2d12;
-    margin-bottom: 8px;
-    text-transform: uppercase;
-  }
-  .modal-desc {
-    font-family: 'Segoe UI', sans-serif;
-    font-size: 15px;
-    color: #e2e8f0;
-    max-width: 620px;
-    margin-bottom: 16px;
-    line-height: 1.4;
-  }
-  .btn-lucha {
-    background: linear-gradient(180deg, #f59e0b, #d97706);
-    color: #000;
-    font-size: 22px;
-    font-family: 'Impact', sans-serif;
-    padding: 12px 34px;
-    border: 4px solid #fef08a;
-    border-radius: 30px;
-    cursor: pointer;
-    box-shadow: 0 6px 0 #78350f, 0 10px 20px rgba(0,0,0,0.5);
-    transition: all 0.1s;
-    letter-spacing: 1px;
-  }
-  .btn-lucha:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 0 #78350f;
-    background: linear-gradient(180deg, #fbbf24, #f59e0b);
-  }
-  .btn-lucha:active {
-    transform: translateY(4px);
-    box-shadow: 0 2px 0 #78350f;
-  }
+    /* Modals */
+    .modal-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(12, 4, 25, 0.94);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      pointer-events: auto;
+      padding: 24px;
+      text-align: center;
+    }
+    .modal-title {
+      font-size: 36px;
+      color: #f59e0b;
+      text-shadow: 3px 3px 0 #7c2d12;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+    .modal-desc {
+      font-family: 'Segoe UI', sans-serif;
+      font-size: 15px;
+      color: #e2e8f0;
+      max-width: 620px;
+      margin-bottom: 16px;
+      line-height: 1.4;
+    }
+    .btn-lucha {
+      background: linear-gradient(180deg, #f59e0b, #d97706);
+      color: #000;
+      font-size: 22px;
+      font-family: 'Impact', sans-serif;
+      padding: 12px 34px;
+      border: 4px solid #fef08a;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 6px 0 #78350f, 0 10px 20px rgba(0,0,0,0.5);
+      transition: all 0.1s;
+      letter-spacing: 1px;
+    }
+    .btn-lucha:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 0 #78350f;
+      background: linear-gradient(180deg, #fbbf24, #f59e0b);
+    }
+    .btn-lucha:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 #78350f;
+    }
 
-  /* Calibration Box */
-  .calibration-box {
-    background: rgba(26, 11, 46, 0.9);
-    border: 3px solid #f59e0b;
-    border-radius: 12px;
-    padding: 16px 24px;
-    max-width: 680px;
-    margin-bottom: 18px;
-    text-align: left;
-    font-family: 'Segoe UI', sans-serif;
-  }
-  .calibration-meters {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-top: 12px;
-  }
-  .calib-card {
-    background: #2e1065;
-    border: 1px solid #a855f7;
-    border-radius: 8px;
-    padding: 10px;
-    text-align: center;
-  }
-  .calib-card.active-gesture {
-    border-color: #facc15;
-    background: #581c87;
-    box-shadow: 0 0 12px #facc15;
-  }
-  .calib-title {
-    font-size: 13px;
-    font-weight: bold;
-    color: #fef08a;
-    margin-bottom: 4px;
-  }
-  .calib-state {
-    font-size: 12px;
-    color: #38bdf8;
-    font-weight: bold;
-  }
+    /* Calibration Box */
+    .calibration-box {
+      background: rgba(26, 11, 46, 0.9);
+      border: 3px solid #f59e0b;
+      border-radius: 12px;
+      padding: 16px 24px;
+      max-width: 680px;
+      margin-bottom: 18px;
+      text-align: left;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    .calibration-meters {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .calib-card {
+      background: #2e1065;
+      border: 1px solid #a855f7;
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+    }
+    .calib-card.active-gesture {
+      border-color: #facc15;
+      background: #581c87;
+      box-shadow: 0 0 12px #facc15;
+    }
+    .calib-title {
+      font-size: 13px;
+      font-weight: bold;
+      color: #fef08a;
+      margin-bottom: 4px;
+    }
+    .calib-state {
+      font-size: 12px;
+      color: #38bdf8;
+      font-weight: bold;
+    }
 
-  /* Curtain */
-  .curtain-top {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 38px;
-    background: repeating-linear-gradient(90deg, #991b1b, #991b1b 30px, #b91c1c 30px, #b91c1c 60px);
-    border-bottom: 5px solid #f59e0b;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.7);
-    z-index: 10;
-  }
-  .curtain-scallops {
-    position: absolute;
-    bottom: -14px;
-    left: 0;
-    width: 100%;
-    height: 14px;
-    background: radial-gradient(circle at 15px 0, transparent 15px, #f59e0b 16px);
-    background-size: 30px 14px;
-  }
-  .hidden {
-    display: none !important;
-  }
-</style>
+    /* Curtain */
+    .curtain-top {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 38px;
+      background: repeating-linear-gradient(90deg, #991b1b, #991b1b 30px, #b91c1c 30px, #b91c1c 60px);
+      border-bottom: 5px solid #f59e0b;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.7);
+      z-index: 10;
+    }
+    .curtain-scallops {
+      position: absolute;
+      bottom: -14px;
+      left: 0;
+      width: 100%;
+      height: 14px;
+      background: radial-gradient(circle at 15px 0, transparent 15px, #f59e0b 16px);
+      background-size: 30px 14px;
+    }
+    .hidden {
+      display: none !important;
+    }
+  </style>
 </head>
 <body>
 
@@ -372,7 +375,7 @@
       <span id="fps-badge">CAM: OFF</span>
     </div>
     <div class="pip-feed-container">
-      <video id="webcam-video" playsinline="" autoplay="" muted=""></video>
+      <video id="webcam-video" playsinline autoplay muted></video>
       <canvas id="handCanvas" width="190" height="118"></canvas>
       <div class="pip-status">
         <span id="tracking-status">ESPERANDO CÁMARA</span>
@@ -424,7 +427,7 @@
   <div id="start-modal" class="modal-overlay">
     <h1 id="title-main" class="modal-title">🎭 FABULOSÍN VS LA MUGRE 🎭</h1>
     <p id="desc-intro" class="modal-desc">
-      ¡Lucha libre de marionetas mexicanas en la mesa del taller! Conecta tu cámara para calibrar tus dedos antes del combate estelar.
+      ¡Lucha libre de títeres en la mesa del taller! Conecta tu cámara para calibrar tus dedos antes de la lucha de campeonato.
     </p>
     <button id="btn-connect-cam" class="btn-lucha">📹 CONECTAR CÁMARA Y ENTRAR AL TALLER</button>
   </div>
@@ -466,21 +469,38 @@
 </div>
 
 <script>
-// --- ASSET LOADER ---
-const ASSETS_PATH = {
-  background: './assets/background.png',
-  fabulosin_idle: './assets/fabulosin_idle.png',
-  fabulosin_attack: './assets/fabulosin_attack.png',
-  fabulosin_hurt: './assets/fabulosin_hurt.png',
-  mugre_idle: './assets/mugre_idle.png',
-  mugre_hurt: './assets/mugre_hurt.png'
+// --- CARGADOR CON RUTA /Assets/ DE TU REPOSITORIO ---
+const SPRITE_NAMES = {
+  background: 'background.png',
+  fabulosin_idle: 'fabulosin_idle.png',
+  fabulosin_attack: 'fabulosin_attack.png',
+  fabulosin_hurt: 'fabulosin_hurt.png',
+  mugre_idle: 'mugre_idle.png',
+  mugre_hurt: 'mugre_hurt.png'
 };
 
 const loadedSprites = {};
-Object.entries(ASSETS_PATH).forEach(([key, url]) => {
+
+Object.entries(SPRITE_NAMES).forEach(([key, filename]) => {
   const img = new Image();
-  img.src = url;
-  img.onload = () => { loadedSprites[key] = img; };
+  // Usa ./Assets/ (con A mayúscula tal cual aparece en tu GitHub)
+  img.src = './Assets/' + filename;
+
+  img.onload = () => {
+    loadedSprites[key] = img;
+    console.log(`[Lucha Títeres] Sprite cargado: ./Assets/${filename}`);
+  };
+
+  img.onerror = () => {
+    // Si falla, reintenta con ./assets/ (minúscula)
+    console.warn(`[Lucha Títeres] Reintentando con ./assets/${filename}...`);
+    const fallbackImg = new Image();
+    fallbackImg.src = './assets/' + filename;
+    fallbackImg.onload = () => {
+      loadedSprites[key] = fallbackImg;
+      console.log(`[Lucha Títeres] Cargado con fallback: ./assets/${filename}`);
+    };
+  };
 });
 
 // --- AUDIO & VOICE SYNTH ---
@@ -565,8 +585,6 @@ class SoundManager {
       osc.stop(this.ctx.currentTime + idx * 0.12 + 0.4);
     });
   }
-
-  // Vocal Announcer via Web Speech API
   speak(text) {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
@@ -745,7 +763,7 @@ class Marionette {
   draw(ctx) {
     ctx.save();
 
-    // Marionette Strings
+    // Hilos de la marioneta
     ctx.strokeStyle = 'rgba(254, 243, 199, 0.75)';
     ctx.lineWidth = 1.3;
 
@@ -785,12 +803,12 @@ class Marionette {
     }
 
     const sprite = loadedSprites[spriteKey];
-    if (sprite) {
+    if (sprite && sprite.complete && sprite.naturalWidth !== 0) {
       const sprW = 160;
       const sprH = 210;
       ctx.drawImage(sprite, -sprW / 2, -sprH + 30, sprW, sprH);
     } else {
-      // Procedural fallback
+      // Fallback si no está lista la imagen
       ctx.fillStyle = this.isPlayer ? '#9333ea' : '#451a03';
       ctx.fillRect(-25, -90, 50, 75);
       ctx.fillStyle = '#facc15';
@@ -1001,7 +1019,7 @@ canvas.addEventListener('mousedown', () => {
 // Scene Draw
 function drawScenery() {
   const bgImg = loadedSprites['background'];
-  if (bgImg) {
+  if (bgImg && bgImg.complete && bgImg.naturalWidth !== 0) {
     ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
   } else {
     ctx.fillStyle = '#2d144b';
@@ -1097,12 +1115,10 @@ function triggerVictorySequence() {
   }, 1500);
 
   setTimeout(() => {
-    // Grand Climax Announcement
     sounds.speak("¡Activos de Fragancia!");
     sounds.playFanfare();
     showAnnouncer("¡ACTIVOS DE FRAGANCIA!", 2800, true);
 
-    // Explode lavender & confetti suds across the ring
     for (let i = 0; i < 90; i++) {
       particles.push(new Particle(
         canvas.width / 2 + (Math.random() - 0.5) * 400,
@@ -1141,7 +1157,7 @@ function endRound(playerWon) {
   }
 }
 
-// Loop
+// Loop principal
 function gameLoop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -1198,5 +1214,5 @@ document.getElementById('btn-restart').addEventListener('click', () => {
 
 requestAnimationFrame(gameLoop);
 </script>
-
-</body></html>
+</body>
+</html>
