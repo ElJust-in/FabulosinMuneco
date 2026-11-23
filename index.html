@@ -469,7 +469,10 @@
 </div>
 
 <script>
-// --- CARGADOR CON RUTA /Assets/ DE TU REPOSITORIO ---
+// --- CARGADOR CON RESPALDO DIRECTO DESDE TU GITHUB RAW ---
+// Garantiza que SIEMPRE cargue tus fotos reales tanto en GitHub Pages como al abrir el archivo en tu máquina
+const GITHUB_RAW_BASE = 'https://raw.githubusercontent.com/ElJust-in/FabulosinTitere/main/Assets/';
+
 const SPRITE_NAMES = {
   background: 'background.png',
   fabulosin_idle: 'fabulosin_idle.png',
@@ -483,22 +486,25 @@ const loadedSprites = {};
 
 Object.entries(SPRITE_NAMES).forEach(([key, filename]) => {
   const img = new Image();
-  // Usa ./Assets/ (con A mayúscula tal cual aparece en tu GitHub)
-  img.src = './Assets/' + filename;
+  img.crossOrigin = 'anonymous';
+
+  // Intento 1: Ruta local Assets/
+  img.src = 'Assets/' + filename;
 
   img.onload = () => {
     loadedSprites[key] = img;
-    console.log(`[Lucha Títeres] Sprite cargado: ./Assets/${filename}`);
+    console.log(`[Sprites] Cargado local: Assets/${filename}`);
   };
 
   img.onerror = () => {
-    // Si falla, reintenta con ./assets/ (minúscula)
-    console.warn(`[Lucha Títeres] Reintentando con ./assets/${filename}...`);
-    const fallbackImg = new Image();
-    fallbackImg.src = './assets/' + filename;
-    fallbackImg.onload = () => {
-      loadedSprites[key] = fallbackImg;
-      console.log(`[Lucha Títeres] Cargado con fallback: ./assets/${filename}`);
+    // Intento 2 (Garantizado): Cargar directo de tu repositorio público en GitHub
+    console.warn(`[Sprites] Descargando desde GitHub Raw: ${filename}`);
+    const remoteImg = new Image();
+    remoteImg.crossOrigin = 'anonymous';
+    remoteImg.src = GITHUB_RAW_BASE + filename;
+    remoteImg.onload = () => {
+      loadedSprites[key] = remoteImg;
+      console.log(`[Sprites] Cargado desde GitHub: ${filename}`);
     };
   };
 });
@@ -803,16 +809,15 @@ class Marionette {
     }
 
     const sprite = loadedSprites[spriteKey];
-    if (sprite && sprite.complete && sprite.naturalWidth !== 0) {
-      const sprW = 160;
-      const sprH = 210;
-      ctx.drawImage(sprite, -sprW / 2, -sprH + 30, sprW, sprH);
+    if (sprite && sprite.complete && sprite.naturalWidth > 0) {
+      // Dibuja la foto real con su proporción natural
+      const sprW = 180;
+      const sprH = (sprite.naturalHeight / sprite.naturalWidth) * sprW;
+      ctx.drawImage(sprite, -sprW / 2, -sprH + 20, sprW, sprH);
     } else {
-      // Fallback si no está lista la imagen
+      // Bloque temporal solo mientras termina de bajar la imagen
       ctx.fillStyle = this.isPlayer ? '#9333ea' : '#451a03';
       ctx.fillRect(-25, -90, 50, 75);
-      ctx.fillStyle = '#facc15';
-      ctx.fillRect(-15, -110, 30, 20);
     }
 
     ctx.restore();
@@ -1019,7 +1024,7 @@ canvas.addEventListener('mousedown', () => {
 // Scene Draw
 function drawScenery() {
   const bgImg = loadedSprites['background'];
-  if (bgImg && bgImg.complete && bgImg.naturalWidth !== 0) {
+  if (bgImg && bgImg.complete && bgImg.naturalWidth > 0) {
     ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
   } else {
     ctx.fillStyle = '#2d144b';
