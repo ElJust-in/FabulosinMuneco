@@ -1,0 +1,1202 @@
+<html data-type="html" data-identifier="f8b49893-cfbe-4154-8635-0a6ab0dbd810" data-title="Fabulosín vs La Mugre: Lucha de Marionetas" data-version="5" width="1024" height="700"><head>
+<!-- MediaPipe Hands & Camera Utils -->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+
+<style>
+  * {
+    box-sizing: border-box;
+    user-select: none;
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    background: #0f051d;
+    color: #fff;
+    font-family: 'Impact', 'Trebuchet MS', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+  #game-container {
+    position: relative;
+    width: 1000px;
+    height: 650px;
+    background: #000;
+    border: 8px solid #d97706;
+    border-radius: 12px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.85), 0 0 35px rgba(217, 119, 6, 0.4);
+    overflow: hidden;
+  }
+  canvas#gameCanvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Webcam PiP (Picture-in-Picture) */
+  #webcam-panel {
+    position: absolute;
+    top: 55px;
+    left: 18px;
+    width: 190px;
+    height: 142px;
+    background: rgba(15, 7, 30, 0.92);
+    border: 2px solid #a855f7;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.7), 0 0 10px rgba(168, 85, 247, 0.4);
+    overflow: hidden;
+    z-index: 40;
+    display: flex;
+    flex-direction: column;
+  }
+  .pip-header {
+    background: #4c1d95;
+    padding: 3px 6px;
+    font-size: 10px;
+    color: #fef08a;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    letter-spacing: 0.5px;
+    font-family: monospace;
+  }
+  .pip-feed-container {
+    position: relative;
+    flex: 1;
+    background: #000;
+  }
+  #webcam-video {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1);
+    opacity: 0.85;
+  }
+  #handCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transform: scaleX(-1);
+    pointer-events: none;
+  }
+  .pip-status {
+    position: absolute;
+    bottom: 2px;
+    left: 4px;
+    right: 4px;
+    font-family: monospace;
+    font-size: 9px;
+    color: #4ade80;
+    background: rgba(0,0,0,0.75);
+    padding: 2px 4px;
+    border-radius: 3px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* UI Overlay */
+  .ui-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+  .hud-top {
+    position: absolute;
+    top: 15px;
+    left: 20px;
+    right: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  .fighter-card {
+    display: flex;
+    flex-direction: column;
+    width: 360px;
+  }
+  .fighter-card.right {
+    align-items: flex-end;
+  }
+  .fighter-name-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 20px;
+    letter-spacing: 1.5px;
+    text-shadow: 2px 2px 0 #000;
+    margin-bottom: 4px;
+  }
+  .player-name {
+    color: #c084fc;
+  }
+  .enemy-name {
+    color: #f87171;
+  }
+  .bar-container {
+    width: 100%;
+    height: 22px;
+    background: #27272a;
+    border: 3px solid #f59e0b;
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.8);
+  }
+  .hp-fill {
+    height: 100%;
+    width: 100%;
+    transition: width 0.15s ease-out;
+  }
+  #player-hp {
+    background: linear-gradient(90deg, #9333ea, #c084fc, #38bdf8);
+  }
+  #enemy-hp {
+    background: linear-gradient(90deg, #ef4444, #f97316, #eab308);
+    float: right;
+  }
+  .center-banner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .round-timer {
+    background: #b45309;
+    color: #fef08a;
+    font-size: 28px;
+    padding: 2px 14px;
+    border: 3px solid #fef08a;
+    border-radius: 8px;
+    text-shadow: 2px 2px 0 #000;
+  }
+
+  /* Combat & Victory Announcer */
+  #announcer-text {
+    position: absolute;
+    top: 36%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    font-size: 52px;
+    font-weight: bold;
+    color: #facc15;
+    text-shadow: 4px 4px 0 #b91c1c, -2px -2px 0 #000;
+    text-align: center;
+    transition: transform 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    white-space: nowrap;
+    z-index: 50;
+  }
+  #announcer-text.show {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  #announcer-text.victory-phrase {
+    font-size: 58px;
+    color: #fef08a;
+    text-shadow: 4px 4px 0 #7e22ce, -2px -2px 0 #000;
+    animation: pulseVictory 0.6s infinite alternate;
+  }
+  @keyframes pulseVictory {
+    from { transform: translate(-50%, -50%) scale(1); }
+    to { transform: translate(-50%, -50%) scale(1.08); }
+  }
+
+  /* Bottom Controls HUD */
+  .hud-bottom {
+    position: absolute;
+    bottom: 12px;
+    left: 20px;
+    right: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+  .gestures-guide {
+    background: rgba(15, 7, 30, 0.88);
+    border: 2px solid #d97706;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 12px;
+    color: #fef08a;
+    display: flex;
+    gap: 14px;
+    pointer-events: auto;
+  }
+  .gesture-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(88, 28, 135, 0.6);
+    padding: 3px 8px;
+    border-radius: 12px;
+    border: 1px solid #a855f7;
+  }
+
+  /* Modals */
+  .modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(12, 4, 25, 0.94);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    pointer-events: auto;
+    padding: 24px;
+    text-align: center;
+  }
+  .modal-title {
+    font-size: 36px;
+    color: #f59e0b;
+    text-shadow: 3px 3px 0 #7c2d12;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+  .modal-desc {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 15px;
+    color: #e2e8f0;
+    max-width: 620px;
+    margin-bottom: 16px;
+    line-height: 1.4;
+  }
+  .btn-lucha {
+    background: linear-gradient(180deg, #f59e0b, #d97706);
+    color: #000;
+    font-size: 22px;
+    font-family: 'Impact', sans-serif;
+    padding: 12px 34px;
+    border: 4px solid #fef08a;
+    border-radius: 30px;
+    cursor: pointer;
+    box-shadow: 0 6px 0 #78350f, 0 10px 20px rgba(0,0,0,0.5);
+    transition: all 0.1s;
+    letter-spacing: 1px;
+  }
+  .btn-lucha:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 0 #78350f;
+    background: linear-gradient(180deg, #fbbf24, #f59e0b);
+  }
+  .btn-lucha:active {
+    transform: translateY(4px);
+    box-shadow: 0 2px 0 #78350f;
+  }
+
+  /* Calibration Box */
+  .calibration-box {
+    background: rgba(26, 11, 46, 0.9);
+    border: 3px solid #f59e0b;
+    border-radius: 12px;
+    padding: 16px 24px;
+    max-width: 680px;
+    margin-bottom: 18px;
+    text-align: left;
+    font-family: 'Segoe UI', sans-serif;
+  }
+  .calibration-meters {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 12px;
+  }
+  .calib-card {
+    background: #2e1065;
+    border: 1px solid #a855f7;
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+  }
+  .calib-card.active-gesture {
+    border-color: #facc15;
+    background: #581c87;
+    box-shadow: 0 0 12px #facc15;
+  }
+  .calib-title {
+    font-size: 13px;
+    font-weight: bold;
+    color: #fef08a;
+    margin-bottom: 4px;
+  }
+  .calib-state {
+    font-size: 12px;
+    color: #38bdf8;
+    font-weight: bold;
+  }
+
+  /* Curtain */
+  .curtain-top {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 38px;
+    background: repeating-linear-gradient(90deg, #991b1b, #991b1b 30px, #b91c1c 30px, #b91c1c 60px);
+    border-bottom: 5px solid #f59e0b;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.7);
+    z-index: 10;
+  }
+  .curtain-scallops {
+    position: absolute;
+    bottom: -14px;
+    left: 0;
+    width: 100%;
+    height: 14px;
+    background: radial-gradient(circle at 15px 0, transparent 15px, #f59e0b 16px);
+    background-size: 30px 14px;
+  }
+  .hidden {
+    display: none !important;
+  }
+</style>
+</head>
+<body>
+
+<div id="game-container">
+  <div class="curtain-top"><div class="curtain-scallops"></div></div>
+  <canvas id="gameCanvas" width="1000" height="650"></canvas>
+
+  <!-- PiP Webcam Hand Tracking Window -->
+  <div id="webcam-panel">
+    <div class="pip-header">
+      <span id="pip-header-label">🖐️ HILOS VIRTUALES</span>
+      <span id="fps-badge">CAM: OFF</span>
+    </div>
+    <div class="pip-feed-container">
+      <video id="webcam-video" playsinline="" autoplay="" muted=""></video>
+      <canvas id="handCanvas" width="190" height="118"></canvas>
+      <div class="pip-status">
+        <span id="tracking-status">ESPERANDO CÁMARA</span>
+        <span id="gesture-detected">---</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="ui-layer" id="game-hud">
+    <div class="hud-top">
+      <div class="fighter-card" style="margin-left: 195px;">
+        <div class="fighter-name-badge">
+          <span style="font-size: 24px;">🟣</span>
+          <span class="player-name">FABULOSÍN (CAMPEÓN)</span>
+        </div>
+        <div class="bar-container">
+          <div id="player-hp" class="hp-fill"></div>
+        </div>
+      </div>
+
+      <div class="center-banner">
+        <div class="round-timer" id="timer-display">60</div>
+      </div>
+
+      <div class="fighter-card right">
+        <div class="fighter-name-badge">
+          <span class="enemy-name" id="enemy-display-name">MUGRE</span>
+          <span style="font-size: 24px;">👹</span>
+        </div>
+        <div class="bar-container">
+          <div id="enemy-hp" class="hp-fill"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="announcer-text">¡PRIMERA CAÍDA!</div>
+
+    <div class="hud-bottom">
+      <div class="gestures-guide">
+        <div class="gesture-pill"><span>👋 <b>Mover Mano:</b> Cruceta</span></div>
+        <div class="gesture-pill"><span>🤏 <b>Pellizco:</b> Trapeadorzo</span></div>
+        <div class="gesture-pill"><span>🖐️ <b>Palma:</b> Chorro Lavanda</span></div>
+        <div class="gesture-pill"><span>✊ <b>Puño:</b> Salto</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Screen 1: Connect Camera Modal -->
+  <div id="start-modal" class="modal-overlay">
+    <h1 id="title-main" class="modal-title">🎭 FABULOSÍN VS LA MUGRE 🎭</h1>
+    <p id="desc-intro" class="modal-desc">
+      ¡Lucha libre de marionetas mexicanas en la mesa del taller! Conecta tu cámara para calibrar tus dedos antes del combate estelar.
+    </p>
+    <button id="btn-connect-cam" class="btn-lucha">📹 CONECTAR CÁMARA Y ENTRAR AL TALLER</button>
+  </div>
+
+  <!-- Screen 2: Calibration & Warm-Up (Taller de Hilos) -->
+  <div id="calibration-modal" class="modal-overlay hidden">
+    <h2 id="calib-heading" class="modal-title">🛠️ TALLER DE CALIBRACIÓN DE HILOS</h2>
+    <p id="calib-sub" class="modal-desc">
+      Mueve tu mano en el recuadro superior izquierdo y prueba los gestos. Cuando estés listo, sube al ring para la gran función.
+    </p>
+
+    <div class="calibration-box">
+      <div style="font-size: 14px; color: #fef08a; margin-bottom: 8px;"><b>GESTOS DETECTADOS EN TU MANO:</b></div>
+      <div class="calibration-meters">
+        <div class="calib-card" id="calib-pinch">
+          <div class="calib-title">🤏 PELLIZCO (PINZA)</div>
+          <div class="calib-state" id="calib-pinch-state">Trapeadorzo</div>
+        </div>
+        <div class="calib-card" id="calib-open">
+          <div class="calib-title">🖐️ PALMA ABIERTA</div>
+          <div class="calib-state" id="calib-open-state">Chorro Lavanda</div>
+        </div>
+        <div class="calib-card" id="calib-fist">
+          <div class="calib-title">✊ PUÑO CERRADO</div>
+          <div class="calib-state" id="calib-fist-state">Salto / Cuerda</div>
+        </div>
+      </div>
+    </div>
+
+    <button id="btn-enter-ring" class="btn-lucha">🥊 ¡LISTO, SUBIR AL CUADRILÁTERO!</button>
+  </div>
+
+  <!-- Screen 3: End Game Modal -->
+  <div id="end-modal" class="modal-overlay hidden">
+    <h2 id="end-title" class="modal-title">¡1, 2, 3, ACTIVOS DE FRAGANCIA!</h2>
+    <p id="end-desc" class="modal-desc">Has derrotado a Mugre. El ring de madera huele a lavanda fresca por 24 horas continuas.</p>
+    <button id="btn-restart" class="btn-lucha">REVANCHA</button>
+  </div>
+</div>
+
+<script>
+// --- ASSET LOADER ---
+const ASSETS_PATH = {
+  background: './assets/background.png',
+  fabulosin_idle: './assets/fabulosin_idle.png',
+  fabulosin_attack: './assets/fabulosin_attack.png',
+  fabulosin_hurt: './assets/fabulosin_hurt.png',
+  mugre_idle: './assets/mugre_idle.png',
+  mugre_hurt: './assets/mugre_hurt.png'
+};
+
+const loadedSprites = {};
+Object.entries(ASSETS_PATH).forEach(([key, url]) => {
+  const img = new Image();
+  img.src = url;
+  img.onload = () => { loadedSprites[key] = img; };
+});
+
+// --- AUDIO & VOICE SYNTH ---
+class SoundManager {
+  constructor() {
+    this.ctx = null;
+  }
+  init() {
+    if (!this.ctx) {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      this.ctx = new AudioContext();
+    }
+    if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+  }
+  playHit() {
+    if (!this.ctx) return;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(160, this.ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(35, this.ctx.currentTime + 0.15);
+    gain.gain.setValueAtTime(0.7, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start();
+    osc.stop(this.ctx.currentTime + 0.15);
+  }
+  playMopWhoosh() {
+    if (!this.ctx) return;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(380, this.ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(120, this.ctx.currentTime + 0.18);
+    gain.gain.setValueAtTime(0.35, this.ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.18);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start();
+    osc.stop(this.ctx.currentTime + 0.18);
+  }
+  playLavenderSplash() {
+    if (!this.ctx) return;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(540, this.ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(920, this.ctx.currentTime + 0.25);
+    gain.gain.setValueAtTime(0.4, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.25);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start();
+    osc.stop(this.ctx.currentTime + 0.25);
+  }
+  playBell() {
+    if (!this.ctx) return;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(987.77, this.ctx.currentTime);
+    gain.gain.setValueAtTime(0.8, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 1.2);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start();
+    osc.stop(this.ctx.currentTime + 1.2);
+  }
+  playFanfare() {
+    if (!this.ctx) return;
+    const notes = [523.25, 659.25, 783.99, 1046.5];
+    notes.forEach((freq, idx) => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.2, this.ctx.currentTime + idx * 0.12);
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + idx * 0.12 + 0.4);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(this.ctx.currentTime + idx * 0.12);
+      osc.stop(this.ctx.currentTime + idx * 0.12 + 0.4);
+    });
+  }
+
+  // Vocal Announcer via Web Speech API
+  speak(text) {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'es-MX';
+      utterance.rate = 1.05;
+      utterance.pitch = 1.15;
+      window.speechSynthesis.speak(utterance);
+    }
+  }
+}
+const sounds = new SoundManager();
+
+// --- CANVAS & PARTICLES ---
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const handCanvas = document.getElementById('handCanvas');
+const handCtx = handCanvas.getContext('2d');
+const webcamVideo = document.getElementById('webcam-video');
+
+const RING_Y = 515;
+const GRAVITY = 0.65;
+
+let particles = [];
+class Particle {
+  constructor(x, y, vx, vy, color, size, life = 30, isBubble = false) {
+    this.x = x; this.y = y; this.vx = vx; this.vy = vy;
+    this.color = color; this.size = size; this.life = life;
+    this.maxLife = life; this.isBubble = isBubble;
+  }
+  update() {
+    this.x += this.vx; this.y += this.vy;
+    this.vy += this.isBubble ? -0.05 : 0.2;
+    this.life--;
+  }
+  draw(ctx) {
+    const alpha = Math.max(0, this.life / this.maxLife);
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = this.color;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.fill();
+    if (this.isBubble) {
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+}
+
+// --- MARIONETTE FIGHTER CLASS ---
+class Marionette {
+  constructor(x, isPlayer = false, name = "Fabulosín") {
+    this.isPlayer = isPlayer;
+    this.x = x;
+    this.y = RING_Y - 100;
+    this.vx = 0;
+    this.vy = 0;
+    this.crossbarX = x;
+    this.crossbarY = 70;
+    this.facing = isPlayer ? 1 : -1;
+    this.hp = 100;
+    this.name = name;
+
+    this.isAttacking = false;
+    this.attackTimer = 0;
+    this.attackType = 'none';
+    this.hitStun = 0;
+  }
+
+  update(opponent) {
+    if (this.hitStun > 0) this.hitStun--;
+
+    const springX = (this.crossbarX - this.x) * 0.07;
+    this.vx += springX;
+    this.vx *= 0.82;
+    this.x += this.vx;
+
+    this.vy += GRAVITY;
+    this.y += this.vy;
+
+    const maxDrop = this.crossbarY + 410;
+    if (this.y > maxDrop) {
+      this.y = maxDrop;
+      this.vy *= 0.4;
+    }
+
+    if (this.y > RING_Y - 95) {
+      this.y = RING_Y - 95;
+      this.vy = 0;
+    }
+
+    if (this.x < 190) { this.x = 190; this.vx = 0; }
+    if (this.x > 820) { this.x = 820; this.vx = 0; }
+
+    if (opponent && this.hitStun <= 0) {
+      this.facing = opponent.x > this.x ? 1 : -1;
+    }
+
+    if (this.isAttacking) {
+      this.attackTimer--;
+      if (this.attackTimer <= 0) {
+        this.isAttacking = false;
+        this.attackType = 'none';
+      }
+    }
+  }
+
+  triggerAttack(type, opponent) {
+    if (this.isAttacking || this.hitStun > 0) return;
+    this.isAttacking = true;
+    this.attackType = type;
+
+    if (type === 'mop') {
+      this.attackTimer = 20;
+      sounds.playMopWhoosh();
+      if (opponent) {
+        const hitRange = 125;
+        const dist = Math.abs((this.x + this.facing * 50) - opponent.x);
+        if (dist < hitRange && Math.abs(this.y - opponent.y) < 95) {
+          setTimeout(() => {
+            opponent.takeHit(15, this.facing);
+            for (let i = 0; i < 18; i++) {
+              particles.push(new Particle(
+                opponent.x, opponent.y - 60,
+                (Math.random() - 0.5) * 6 + this.facing * 4,
+                (Math.random() - 0.5) * 6 - 2,
+                this.isPlayer ? '#c084fc' : '#451a03',
+                Math.random() * 6 + 3,
+                30,
+                this.isPlayer
+              ));
+            }
+          }, 80);
+        }
+      }
+    } else if (type === 'splash') {
+      this.attackTimer = 24;
+      sounds.playLavenderSplash();
+      const splashX = this.x + this.facing * 85;
+      const splashY = this.y - 50;
+      for (let i = 0; i < 28; i++) {
+        particles.push(new Particle(
+          splashX, splashY,
+          this.facing * (Math.random() * 8 + 3),
+          (Math.random() - 0.5) * 5,
+          ['#e9d5ff', '#c084fc', '#a855f7', '#60a5fa'][Math.floor(Math.random()*4)],
+          Math.random() * 8 + 4,
+          35,
+          true
+        ));
+      }
+      if (opponent) {
+        const dist = Math.abs(this.x - opponent.x);
+        if (dist < 210 && Math.abs(this.y - opponent.y) < 100) {
+          opponent.takeHit(25, this.facing);
+        }
+      }
+    } else if (type === 'jump') {
+      this.vy = -14;
+      this.crossbarY = Math.max(40, this.crossbarY - 45);
+      sounds.playMopWhoosh();
+    }
+  }
+
+  takeHit(damage, pushDir) {
+    this.hp = Math.max(0, this.hp - damage);
+    this.hitStun = 14;
+    this.vx = pushDir * 8;
+    this.vy = -4;
+    sounds.playHit();
+  }
+
+  draw(ctx) {
+    ctx.save();
+
+    // Marionette Strings
+    ctx.strokeStyle = 'rgba(254, 243, 199, 0.75)';
+    ctx.lineWidth = 1.3;
+
+    const topPegX = this.crossbarX;
+    const topPegY = this.crossbarY;
+    const charHeadX = this.x;
+    const charHeadY = this.y - 120;
+    const charArmLX = this.x - this.facing * 35;
+    const charArmRX = this.x + this.facing * 35;
+
+    ctx.beginPath();
+    ctx.moveTo(topPegX, topPegY);
+    ctx.lineTo(charHeadX, charHeadY);
+    ctx.moveTo(topPegX - 35, topPegY);
+    ctx.lineTo(charArmLX, charHeadY + 40);
+    ctx.moveTo(topPegX + 35, topPegY);
+    ctx.lineTo(charArmRX, charHeadY + 40);
+    ctx.stroke();
+
+    ctx.translate(this.x, this.y);
+    if (this.facing === -1) {
+      ctx.scale(-1, 1);
+    }
+
+    if (this.hitStun > 0 && Math.floor(Date.now() / 60) % 2 === 0) {
+      ctx.filter = 'brightness(2) saturate(0.5)';
+    }
+
+    let spriteKey = null;
+    if (this.isPlayer) {
+      if (this.hitStun > 0) spriteKey = 'fabulosin_hurt';
+      else if (this.isAttacking) spriteKey = 'fabulosin_attack';
+      else spriteKey = 'fabulosin_idle';
+    } else {
+      if (this.hitStun > 0) spriteKey = 'mugre_hurt';
+      else spriteKey = 'mugre_idle';
+    }
+
+    const sprite = loadedSprites[spriteKey];
+    if (sprite) {
+      const sprW = 160;
+      const sprH = 210;
+      ctx.drawImage(sprite, -sprW / 2, -sprH + 30, sprW, sprH);
+    } else {
+      // Procedural fallback
+      ctx.fillStyle = this.isPlayer ? '#9333ea' : '#451a03';
+      ctx.fillRect(-25, -90, 50, 75);
+      ctx.fillStyle = '#facc15';
+      ctx.fillRect(-15, -110, 30, 20);
+    }
+
+    ctx.restore();
+  }
+}
+
+let player = new Marionette(320, true, "Fabulosín");
+let enemy = new Marionette(680, false, "Mugre");
+
+let gameRunning = false;
+let inCalibrationMode = false;
+let roundTime = 60;
+let timerInterval = null;
+
+// --- MEDIAPIPE TRACKING ---
+let handsDetector = null;
+let cameraInstance = null;
+let lastGestureTime = 0;
+let isCameraActive = false;
+
+const HAND_CONNECTIONS = [
+  [0, 1], [1, 2], [2, 3], [3, 4],
+  [0, 5], [5, 6], [6, 7], [7, 8],
+  [5, 9], [9, 10], [10, 11], [11, 12],
+  [9, 13], [13, 14], [14, 15], [15, 16],
+  [13, 17], [17, 18], [18, 19], [19, 20],
+  [0, 17]
+];
+
+function initMediaPipe(onSuccess) {
+  const statusEl = document.getElementById('tracking-status');
+  const fpsBadge = document.getElementById('fps-badge');
+
+  if (typeof Hands === 'undefined') {
+    statusEl.textContent = "MODO RATÓN";
+    if (onSuccess) onSuccess();
+    return;
+  }
+
+  statusEl.textContent = "INICIANDO...";
+  handsDetector = new Hands({
+    locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+  });
+
+  handsDetector.setOptions({
+    maxNumHands: 1,
+    modelComplexity: 1,
+    minDetectionConfidence: 0.5,
+    minTrackingConfidence: 0.5
+  });
+
+  handsDetector.onResults(onHandResults);
+
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    cameraInstance = new Camera(webcamVideo, {
+      onFrame: async () => {
+        if (handsDetector && isCameraActive) {
+          await handsDetector.send({ image: webcamVideo });
+        }
+      },
+      width: 320,
+      height: 240
+    });
+    cameraInstance.start().then(() => {
+      isCameraActive = true;
+      fpsBadge.textContent = "CAM: ACTIVA";
+      statusEl.textContent = "MANO LISTA";
+      if (onSuccess) onSuccess();
+    }).catch(err => {
+      console.warn("Camera fallback", err);
+      statusEl.textContent = "CÁMARA BLOQUEADA";
+      fpsBadge.textContent = "RATÓN";
+      if (onSuccess) onSuccess();
+    });
+  }
+}
+
+function calculateDistance(p1, p2) {
+  const dx = p1.x - p2.x;
+  const dy = p1.y - p2.y;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+function onHandResults(results) {
+  handCtx.clearRect(0, 0, handCanvas.width, handCanvas.height);
+  const gestureEl = document.getElementById('gesture-detected');
+  const statusEl = document.getElementById('tracking-status');
+
+  const cardPinch = document.getElementById('calib-pinch');
+  const cardOpen = document.getElementById('calib-open');
+  const cardFist = document.getElementById('calib-fist');
+
+  if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) {
+    statusEl.textContent = "BUSCANDO MANO...";
+    gestureEl.textContent = "---";
+    if (cardPinch) cardPinch.classList.remove('active-gesture');
+    if (cardOpen) cardOpen.classList.remove('active-gesture');
+    if (cardFist) cardFist.classList.remove('active-gesture');
+    return;
+  }
+
+  statusEl.textContent = "HILOS CONECTADOS";
+  const landmarks = results.multiHandLandmarks[0];
+  drawHandSkeleton(landmarks);
+
+  const palmX = (landmarks[0].x + landmarks[9].x) / 2;
+  const palmY = (landmarks[0].y + landmarks[9].y) / 2;
+  const targetCanvasX = (1 - palmX) * canvas.width;
+  const targetCanvasY = palmY * 260 + 30;
+
+  player.crossbarX += (targetCanvasX - player.crossbarX) * 0.24;
+  player.crossbarY += (targetCanvasY - player.crossbarY) * 0.24;
+  player.crossbarX = Math.max(180, Math.min(820, player.crossbarX));
+  player.crossbarY = Math.max(40, Math.min(200, player.crossbarY));
+
+  const thumbTip = landmarks[4];
+  const indexTip = landmarks[8];
+  const middleTip = landmarks[12];
+  const ringTip = landmarks[16];
+  const pinkyTip = landmarks[20];
+  const wrist = landmarks[0];
+
+  const pinchDist = calculateDistance(thumbTip, indexTip);
+  const indexWristDist = calculateDistance(indexTip, wrist);
+  const middleWristDist = calculateDistance(middleTip, wrist);
+  const ringWristDist = calculateDistance(ringTip, wrist);
+  const pinkyWristDist = calculateDistance(pinkyTip, wrist);
+
+  const now = Date.now();
+
+  if (cardPinch) cardPinch.classList.remove('active-gesture');
+  if (cardOpen) cardOpen.classList.remove('active-gesture');
+  if (cardFist) cardFist.classList.remove('active-gesture');
+
+  if (pinchDist < 0.08) {
+    gestureEl.textContent = "🤏 PELLIZCO";
+    if (cardPinch) cardPinch.classList.add('active-gesture');
+    if (now - lastGestureTime > 320) {
+      player.triggerAttack('mop', gameRunning ? enemy : null);
+      lastGestureTime = now;
+    }
+    return;
+  }
+
+  const isFist = (indexWristDist < 0.24 && middleWristDist < 0.24 && ringWristDist < 0.24 && pinkyWristDist < 0.24);
+  if (isFist) {
+    gestureEl.textContent = "✊ PUÑO";
+    if (cardFist) cardFist.classList.add('active-gesture');
+    if (now - lastGestureTime > 400) {
+      player.triggerAttack('jump', gameRunning ? enemy : null);
+      lastGestureTime = now;
+    }
+    return;
+  }
+
+  const isAllOpen = (indexWristDist > 0.38 && middleWristDist > 0.40 && ringWristDist > 0.38 && pinkyWristDist > 0.34);
+  if (isAllOpen) {
+    gestureEl.textContent = "🖐️ PALMA ABIERTA";
+    if (cardOpen) cardOpen.classList.add('active-gesture');
+    if (now - lastGestureTime > 600) {
+      player.triggerAttack('splash', gameRunning ? enemy : null);
+      lastGestureTime = now;
+    }
+    return;
+  }
+
+  gestureEl.textContent = "👋 MOVIENDO";
+}
+
+function drawHandSkeleton(landmarks) {
+  const w = handCanvas.width;
+  const h = handCanvas.height;
+  handCtx.lineWidth = 2;
+  handCtx.strokeStyle = '#38bdf8';
+  HAND_CONNECTIONS.forEach(([start, end]) => {
+    const p1 = landmarks[start];
+    const p2 = landmarks[end];
+    handCtx.beginPath();
+    handCtx.moveTo(p1.x * w, p1.y * h);
+    handCtx.lineTo(p2.x * w, p2.y * h);
+    handCtx.stroke();
+  });
+  landmarks.forEach((p, idx) => {
+    handCtx.beginPath();
+    handCtx.arc(p.x * w, p.y * h, idx === 4 || idx === 8 ? 4 : 2.5, 0, Math.PI * 2);
+    handCtx.fillStyle = (idx === 4 || idx === 8) ? '#f43f5e' : '#fbbf24';
+    handCtx.fill();
+  });
+}
+
+// Mouse Fallback
+canvas.addEventListener('mousemove', (e) => {
+  const rect = canvas.getBoundingClientRect();
+  const mouseX = (e.clientX - rect.left) * (canvas.width / rect.width);
+  const mouseY = (e.clientY - rect.top) * (canvas.height / rect.height);
+  player.crossbarX = Math.max(180, Math.min(820, mouseX));
+  player.crossbarY = Math.max(40, Math.min(200, mouseY));
+});
+canvas.addEventListener('mousedown', () => {
+  sounds.init();
+  player.triggerAttack('mop', gameRunning ? enemy : null);
+});
+
+// Scene Draw
+function drawScenery() {
+  const bgImg = loadedSprites['background'];
+  if (bgImg) {
+    ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
+  } else {
+    ctx.fillStyle = '#2d144b';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#e2e8f0';
+    ctx.fillRect(100, RING_Y, 800, 100);
+  }
+
+  if (inCalibrationMode) {
+    ctx.fillStyle = 'rgba(15, 7, 30, 0.75)';
+    ctx.fillRect(0, 0, canvas.width, 42);
+    ctx.fillStyle = '#fef08a';
+    ctx.font = 'bold 18px Impact';
+    ctx.textAlign = 'center';
+    ctx.fillText('🧵 MODO TALLER: MUEVE TU MANO FRENTE A LA CÁMARA PARA PROBAR LOS HILOS', canvas.width / 2, 28);
+  }
+}
+
+function updateEnemyAI() {
+  if (!gameRunning || enemy.hp <= 0) return;
+  const dist = player.x - enemy.x;
+  const desiredDistance = 95;
+  if (Math.abs(dist) > desiredDistance) {
+    enemy.crossbarX += (player.x + (dist > 0 ? -desiredDistance : desiredDistance) - enemy.crossbarX) * 0.04;
+  }
+  enemy.crossbarY = 90 + Math.sin(Date.now() * 0.003) * 30;
+
+  if (Math.abs(dist) < 130 && Math.random() < 0.035) {
+    enemy.triggerAttack('mop', player);
+  } else if (Math.random() < 0.015) {
+    enemy.triggerAttack('jump', player);
+  }
+}
+
+const announcerEl = document.getElementById('announcer-text');
+function showAnnouncer(text, duration = 1500, isVictory = false) {
+  announcerEl.textContent = text;
+  if (isVictory) announcerEl.classList.add('victory-phrase');
+  else announcerEl.classList.remove('victory-phrase');
+
+  announcerEl.classList.add('show');
+  setTimeout(() => {
+    announcerEl.classList.remove('show');
+    announcerEl.classList.remove('victory-phrase');
+  }, duration);
+}
+
+function startRound() {
+  inCalibrationMode = false;
+  gameRunning = true;
+  roundTime = 60;
+  player.hp = 100;
+  enemy.hp = 100;
+  player.x = 320;
+  player.crossbarX = 320;
+  enemy.x = 680;
+  enemy.crossbarX = 680;
+
+  document.getElementById('timer-display').textContent = roundTime;
+  document.getElementById('player-hp').style.width = '100%';
+  document.getElementById('enemy-hp').style.width = '100%';
+
+  sounds.playBell();
+  showAnnouncer("¡A TRAPEAR LA MUGRE!", 1600);
+
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    if (!gameRunning) return;
+    roundTime--;
+    document.getElementById('timer-display').textContent = roundTime;
+    if (roundTime <= 0) {
+      endRound(player.hp >= enemy.hp);
+    }
+  }, 1000);
+}
+
+// Victory Sequence: "1, 2, 3, ¡Activos de Fragancia!"
+function triggerVictorySequence() {
+  sounds.speak("Uno");
+  sounds.playBell();
+  showAnnouncer("¡1!", 650);
+
+  setTimeout(() => {
+    sounds.speak("Dos");
+    sounds.playBell();
+    showAnnouncer("¡2!", 650);
+  }, 750);
+
+  setTimeout(() => {
+    sounds.speak("Tres");
+    sounds.playBell();
+    showAnnouncer("¡3!", 650);
+  }, 1500);
+
+  setTimeout(() => {
+    // Grand Climax Announcement
+    sounds.speak("¡Activos de Fragancia!");
+    sounds.playFanfare();
+    showAnnouncer("¡ACTIVOS DE FRAGANCIA!", 2800, true);
+
+    // Explode lavender & confetti suds across the ring
+    for (let i = 0; i < 90; i++) {
+      particles.push(new Particle(
+        canvas.width / 2 + (Math.random() - 0.5) * 400,
+        RING_Y - 80 + (Math.random() - 0.5) * 100,
+        (Math.random() - 0.5) * 14,
+        (Math.random() - 0.5) * 14 - 4,
+        ['#c084fc', '#fef08a', '#38bdf8', '#f472b6', '#a855f7'][Math.floor(Math.random() * 5)],
+        Math.random() * 10 + 4,
+        65,
+        true
+      ));
+    }
+  }, 2250);
+
+  setTimeout(() => {
+    document.getElementById('end-title').textContent = "¡1, 2, 3, ACTIVOS DE FRAGANCIA!";
+    document.getElementById('end-desc').textContent = "Has derrotado a Mugre. El ring de madera huele a lavanda fresca por 24 horas continuas.";
+    document.getElementById('end-modal').classList.remove('hidden');
+  }, 4400);
+}
+
+function endRound(playerWon) {
+  gameRunning = false;
+  clearInterval(timerInterval);
+
+  if (playerWon) {
+    triggerVictorySequence();
+  } else {
+    sounds.speak("¡La mugre domina!");
+    showAnnouncer("¡LA MUGRE DOMINA!", 2000);
+    setTimeout(() => {
+      document.getElementById('end-title').textContent = "¡MANCHADO Y DERROTADO!";
+      document.getElementById('end-desc').textContent = "Mugre te atrapó en las cuerdas. ¡Ajusta los hilos de Fabulosín y regresa al ring!";
+      document.getElementById('end-modal').classList.remove('hidden');
+    }, 1800);
+  }
+}
+
+// Loop
+function gameLoop() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  if (gameRunning) {
+    updateEnemyAI();
+    player.update(enemy);
+    enemy.update(player);
+
+    document.getElementById('player-hp').style.width = `${Math.max(0, player.hp)}%`;
+    document.getElementById('enemy-hp').style.width = `${Math.max(0, enemy.hp)}%`;
+
+    if (enemy.hp <= 0) endRound(true);
+    else if (player.hp <= 0) endRound(false);
+  } else {
+    player.update(null);
+  }
+
+  drawScenery();
+  if (gameRunning) {
+    enemy.draw(ctx);
+  }
+  player.draw(ctx);
+
+  for (let i = particles.length - 1; i >= 0; i--) {
+    particles[i].update();
+    particles[i].draw(ctx);
+    if (particles[i].life <= 0) particles.splice(i, 1);
+  }
+
+  requestAnimationFrame(gameLoop);
+}
+
+// Event Listeners
+document.getElementById('btn-connect-cam').addEventListener('click', () => {
+  sounds.init();
+  document.getElementById('start-modal').classList.add('hidden');
+  document.getElementById('calibration-modal').classList.remove('hidden');
+  inCalibrationMode = true;
+  initMediaPipe();
+});
+
+document.getElementById('btn-enter-ring').addEventListener('click', () => {
+  sounds.init();
+  document.getElementById('calibration-modal').classList.add('hidden');
+  startRound();
+});
+
+document.getElementById('btn-restart').addEventListener('click', () => {
+  sounds.init();
+  document.getElementById('end-modal').classList.add('hidden');
+  enemy = new Marionette(680, false, "Mugre");
+  startRound();
+});
+
+requestAnimationFrame(gameLoop);
+</script>
+
+</body></html>
