@@ -1,8 +1,8 @@
-<html data-type="html" data-identifier="6b4b5ff5-baf2-4808-af01-da4e9a19a9a6" data-title="Fabulosín vs La Mugre" data-version="4" width="1200" height="700">
+<html data-type="html" data-identifier="6b4b5ff5-baf2-4808-af01-da4e9a19a9a6" data-title="Fabulosín vs La Mugre" data-version="5" width="1200" height="700">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fabulosín vs La Mugre - Teatro de Títeres</title>
+    <title>Fabulosín vs La Mugre - Arcade de Gestos</title>
     <!-- MediaPipe Hands & Camera Utils -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
@@ -64,8 +64,8 @@
             flex-direction: row-reverse;
         }
         .portrait-box {
-            width: 60px;
-            height: 60px;
+            width: 64px;
+            height: 64px;
             border-radius: 50%;
             border: 3px solid #ffcc00;
             overflow: hidden;
@@ -74,13 +74,13 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 28px;
+            font-size: 30px;
         }
         .bars {
             flex-grow: 1;
         }
         .name-label {
-            font-size: 18px;
+            font-size: 20px;
             letter-spacing: 1.5px;
             text-shadow: 2px 2px 0 #000;
             margin-bottom: 5px;
@@ -88,7 +88,7 @@
         }
         .hp-bar-bg {
             background: rgba(0,0,0,0.7);
-            height: 22px;
+            height: 24px;
             border: 2px solid #fff;
             border-radius: 6px;
             overflow: hidden;
@@ -108,10 +108,10 @@
             float: right;
         }
         .vs-sign {
-            font-size: 32px;
+            font-size: 34px;
             color: #ffeb3b;
-            text-shadow: 0 0 10px #ff9800, 3px 3px 0 #000;
-            padding: 0 10px;
+            text-shadow: 0 0 12px #ff9800, 3px 3px 0 #000;
+            padding: 0 12px;
         }
 
         /* Overlay Paneles */
@@ -149,7 +149,7 @@
             background: linear-gradient(135deg, #ff007f, #7928ca);
             color: #fff;
             border: none;
-            padding: 15px 38px;
+            padding: 16px 40px;
             font-size: 22px;
             font-family: 'Impact', sans-serif;
             letter-spacing: 2px;
@@ -175,27 +175,27 @@
             background: rgba(255,255,255,0.07);
             border: 2px solid #5d288a;
             border-radius: 14px;
-            padding: 20px;
-            width: 300px;
+            padding: 22px;
+            width: 320px;
             display: flex;
             flex-direction: column;
             align-items: center;
             font-family: sans-serif;
         }
         .gesture-card .icon {
-            font-size: 46px;
-            margin-bottom: 10px;
+            font-size: 48px;
+            margin-bottom: 12px;
         }
         .gesture-card .title {
             font-weight: bold;
             color: #ffeb3b;
             margin-bottom: 6px;
-            font-size: 18px;
+            font-size: 19px;
         }
         .gesture-card .desc {
             font-size: 14px;
             color: #ccc;
-            line-height: 1.4;
+            line-height: 1.45;
         }
 
         /* Cámara miniatura en esquina */
@@ -270,28 +270,28 @@
     <!-- PANTALLA 1: Inicio y Activación de Cámara -->
     <div class="overlay-screen" id="screen-welcome">
         <h1 class="title" id="t-welcome">FABULOSÍN VS LA MUGRE</h1>
-        <p class="subtitle" id="st-welcome">Teatro de Títeres Callejero. ¡Conviértete en el titiritero controlando la cruceta y los hilos mágicos con tus manos!</p>
+        <p class="subtitle" id="st-welcome">¡Combate callejero mano a mano! Controla a Fabulosín con tus propios gestos frente a tu cámara y desinfecta el ring.</p>
         <button class="btn" id="btn-start-camera">ACTIVAR CÁMARA Y CALIBRAR</button>
         <p style="margin-top: 15px; font-size: 14px; color: #a593c2; font-family: sans-serif;" id="p-fallback-info">
-            * Con mouse: Mantén presionado el clic para agarrar y mover; suelta el clic para atacar.
+            * Con mouse: Mantén presionado el clic para mover; suelta el clic para atacar.
         </p>
     </div>
 
-    <!-- PANTALLA 2: Calibración y Gestos Actualizados -->
+    <!-- PANTALLA 2: Calibración y Gestos -->
     <div class="overlay-screen hidden" id="screen-calibration">
-        <h1 class="title" id="t-calib">TALLER DEL TITIRITERO</h1>
-        <p class="subtitle" id="st-calib">Aprende la técnica para manipular los hilos de Fabulosín:</p>
+        <h1 class="title" id="t-calib">CALIBRACIÓN DE CONTROL</h1>
+        <p class="subtitle" id="st-calib">Aprende los dos movimientos básicos antes del combate:</p>
         
         <div class="gesture-preview">
             <div class="gesture-card">
                 <div class="icon">🤏</div>
-                <div class="title" id="gc1-title">Pellizco = Mover Títere</div>
-                <div class="desc" id="gc1-desc">Junta las yemas de tu pulgar e índice como si sostuvieras la cruceta. Mueve tu mano en pellizco para desplazar a Fabulosín. ¡Si no pellizcas, el títere no se mueve!</div>
+                <div class="title" id="gc1-title">Pellizco = Mover Personaje</div>
+                <div class="desc" id="gc1-desc">Junta las yemas de tu pulgar e índice. Mientras mantengas el pellizco, Fabulosín seguirá tu mano. Si abres o relajas la mano, se queda en su lugar.</div>
             </div>
             <div class="gesture-card">
                 <div class="icon">🖐️</div>
                 <div class="title" id="gc2-title">Abrir Mano = ¡Ataque Fabuloso!</div>
-                <div class="desc" id="gc2-desc">Abre completamente los dedos de tu mano para liberar la energía y asestar el golpe con el trapeador. Vuelve a pellizcar para moverte y preparar el siguiente ataque.</div>
+                <div class="desc" id="gc2-desc">Abre la mano extendiendo los dedos para lanzar el barrido con el trapeador. Vuelve a pellizcar para moverte y preparar el siguiente golpe.</div>
             </div>
         </div>
 
@@ -347,7 +347,7 @@
             osc.start();
             osc.stop(this.ctx.currentTime + 0.15);
 
-            // Destello aromático
+            // Resplandor de fragancia
             const osc2 = this.ctx.createOscillator();
             const gain2 = this.ctx.createGain();
             osc2.type = 'triangle';
@@ -443,88 +443,30 @@
     let countdownValue = 3;
     let countdownScale = 1;
 
-    // Control de gestos: agarre (pellizco) y ataque (abrir mano)
-    let isHoldingStrings = false; // Solo se mueve si es true (pellizco)
-    let attackArmed = false;      // Se arma al pellizcar, se dispara al abrir
+    // Control de gestos
+    let isPinchingControl = false; // Solo se mueve si es true (pellizco)
+    let attackArmed = false;       // Se arma al pellizcar, se dispara al abrir la mano
 
     // Partículas
     let particles = [];
 
-    // --- TÍTERES ---
+    // --- PERSONAJES (20% MÁS GRANDES, SIN CUERDAS NI CRUCETAS) ---
     const Puppet1 = {
         x: 280,
-        y: 440,
+        y: 475,
         targetX: 280,
-        crossbarX: 280,
-        crossbarY: 80,
-        width: 170,
-        height: 230,
+        // Dimensiones aumentadas un 20% (170 -> 204, 230 -> 276)
+        width: 204,
+        height: 276,
         hp: 100,
         state: 'idle', // 'idle', 'attack', 'hurt', 'defeated'
         stateTimer: 0,
         attackCooldown: 0,
         render(ctx) {
             ctx.save();
-            // Resplandor si el titiritero está sosteniendo los hilos con pellizco
-            if (isHoldingStrings && this.state !== 'defeated') {
-                ctx.shadowColor = '#00e5ff';
-                ctx.shadowBlur = 15;
-            }
+            ctx.translate(this.x, this.y);
 
-            // Cruceta superior de madera
-            ctx.strokeStyle = isHoldingStrings ? '#c68642' : '#8B5A2B';
-            ctx.lineWidth = 9;
-            ctx.lineCap = 'round';
-            ctx.beginPath();
-            ctx.moveTo(this.crossbarX - 45, this.crossbarY);
-            ctx.lineTo(this.crossbarX + 45, this.crossbarY);
-            ctx.stroke();
-
-            ctx.lineWidth = 6;
-            ctx.beginPath();
-            ctx.moveTo(this.crossbarX, this.crossbarY - 25);
-            ctx.lineTo(this.crossbarX, this.crossbarY + 25);
-            ctx.stroke();
-            ctx.shadowBlur = 0;
-
-            // Hilos mágicos
-            const looseOffset = this.state === 'defeated' ? 65 : 0;
-            ctx.strokeStyle = this.state === 'defeated' 
-                ? 'rgba(200, 200, 200, 0.35)' 
-                : (isHoldingStrings ? 'rgba(0, 229, 255, 0.9)' : 'rgba(240, 240, 240, 0.65)');
-            ctx.lineWidth = isHoldingStrings ? 2.2 : 1.5;
-
-            // Hilo izquierdo
-            ctx.beginPath();
-            ctx.moveTo(this.crossbarX - 35, this.crossbarY);
-            if (this.state === 'defeated') {
-                ctx.quadraticCurveTo(this.crossbarX - 50, this.y - 40 + looseOffset, this.x - 30, this.y - 30);
-            } else {
-                ctx.lineTo(this.x - 35, this.y - 70);
-            }
-            ctx.stroke();
-
-            // Hilo derecho
-            ctx.beginPath();
-            ctx.moveTo(this.crossbarX + 35, this.crossbarY);
-            if (this.state === 'defeated') {
-                ctx.quadraticCurveTo(this.crossbarX + 50, this.y - 40 + looseOffset, this.x + 30, this.y - 30);
-            } else {
-                ctx.lineTo(this.x + 35, this.y - 70);
-            }
-            ctx.stroke();
-
-            // Hilo central
-            ctx.beginPath();
-            ctx.moveTo(this.crossbarX, this.crossbarY + 15);
-            if (this.state === 'defeated') {
-                ctx.quadraticCurveTo(this.crossbarX + 10, this.y - 50 + looseOffset, this.x, this.y - 20);
-            } else {
-                ctx.lineTo(this.x, this.y - 90);
-            }
-            ctx.stroke();
-
-            // Sprite de Fabulosín
+            // Seleccionar sprite según el estado
             let imgToDraw = AssetManager.images['fabulosin_idle'];
             if (this.state === 'attack') {
                 imgToDraw = AssetManager.images['fabulosin_attack'] || imgToDraw;
@@ -532,25 +474,37 @@
                 imgToDraw = AssetManager.images['fabulosin_hurt'] || imgToDraw;
             }
 
-            ctx.translate(this.x, this.y);
-
-            // Si está derrotado, queda desplomado en el suelo
+            // Si está derrotado, queda tumbado en la lona
             if (this.state === 'defeated') {
-                ctx.rotate(Math.PI / 2.3);
-                ctx.translate(25, -25);
+                ctx.rotate(Math.PI / 2.2);
+                ctx.translate(35, -30);
             } else {
-                const sway = Math.sin(Date.now() * 0.005) * 0.04;
+                // Suave animación de balanceo / respiración
+                const sway = Math.sin(Date.now() * 0.005) * 0.03;
                 ctx.rotate(sway);
             }
 
+            // Sombra bajo el personaje
+            if (this.state !== 'defeated') {
+                ctx.save();
+                ctx.scale(1, 0.3);
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+                ctx.beginPath();
+                ctx.arc(0, 30, this.width * 0.38, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+
+            // Dibujar imagen 20% más grande directamente
             if (imgToDraw && imgToDraw.complete && imgToDraw.naturalWidth > 0) {
                 ctx.drawImage(imgToDraw, -this.width / 2, -this.height + 25, this.width, this.height);
             } else {
+                // Respaldo geométrico si la imagen tarda en cargar
                 ctx.fillStyle = '#9b4dca';
-                ctx.fillRect(-35, -120, 70, 110);
+                ctx.fillRect(-45, -145, 90, 135);
                 ctx.fillStyle = '#ffe0bd';
                 ctx.beginPath();
-                ctx.arc(0, -145, 25, 0, Math.PI * 2);
+                ctx.arc(0, -170, 32, 0, Math.PI * 2);
                 ctx.fill();
             }
 
@@ -558,8 +512,7 @@
         },
         update() {
             // Suavizado hacia la posición destino
-            this.crossbarX += (this.targetX - this.crossbarX) * 0.18;
-            this.x += (this.crossbarX - this.x) * 0.14;
+            this.x += (this.targetX - this.x) * 0.15;
 
             if (this.stateTimer > 0) {
                 this.stateTimer--;
@@ -576,17 +529,17 @@
             
             this.state = 'attack';
             this.stateTimer = 18;
-            this.attackCooldown = 22;
+            this.attackCooldown = 20;
 
             AudioEngine.playAttackSwipe();
-            spawnAttackBurst(this.x + 40, this.y - 75);
+            spawnAttackBurst(this.x + 50, this.y - 85);
 
-            // Verificar golpe a La Mugre
+            // Verificar golpe a La Mugre (rango ajustado al nuevo tamaño)
             const distance = Math.abs(Puppet2.x - this.x);
-            if (distance < 310) {
+            if (distance < 340) {
                 Puppet2.takeDamage(16);
-                spawnHitParticles(Puppet2.x - 20, Puppet2.y - 75, '#00e5ff', 16);
-                spawnHitParticles(Puppet2.x - 20, Puppet2.y - 75, '#d1b3ff', 16);
+                spawnHitParticles(Puppet2.x - 25, Puppet2.y - 85, '#00e5ff', 18);
+                spawnHitParticles(Puppet2.x - 25, Puppet2.y - 85, '#d1b3ff', 18);
             }
         },
         takeDamage(amount) {
@@ -606,74 +559,62 @@
 
     const Puppet2 = {
         x: 920,
-        y: 440,
+        y: 475,
         targetX: 920,
-        crossbarX: 920,
-        crossbarY: 80,
-        width: 180,
-        height: 230,
+        // Dimensiones aumentadas un 20% (180 -> 216, 230 -> 276)
+        width: 216,
+        height: 276,
         hp: 100,
         state: 'idle', // 'idle', 'hurt', 'defeated', 'laughing'
         stateTimer: 0,
         aiTimer: 0,
         render(ctx) {
-            // Solo desaparece si fue vencida por completo
+            // Si es derrotada por completo, no se dibuja (se disuelve)
             if (this.state === 'defeated') return;
 
             ctx.save();
-            ctx.strokeStyle = '#5a3d28';
-            ctx.lineWidth = 9;
-            ctx.lineCap = 'round';
-            ctx.beginPath();
-            ctx.moveTo(this.crossbarX - 45, this.crossbarY);
-            ctx.lineTo(this.crossbarX + 45, this.crossbarY);
-            ctx.stroke();
-
-            ctx.strokeStyle = 'rgba(100, 70, 50, 0.65)';
-            ctx.lineWidth = 1.5;
-            ctx.beginPath();
-            ctx.moveTo(this.crossbarX - 35, this.crossbarY);
-            ctx.lineTo(this.x - 35, this.y - 70);
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.moveTo(this.crossbarX + 35, this.crossbarY);
-            ctx.lineTo(this.x + 35, this.y - 70);
-            ctx.stroke();
+            ctx.translate(this.x, this.y);
 
             let imgToDraw = AssetManager.images['mugre_idle'];
             if (this.state === 'hurt') {
                 imgToDraw = AssetManager.images['mugre_hurt'] || imgToDraw;
             }
 
-            ctx.translate(this.x, this.y);
-
             // Si está riendo victoriosa, rebota y baila en el ring
             if (this.state === 'laughing') {
-                const bounce = Math.abs(Math.sin(Date.now() * 0.012)) * 26;
+                const bounce = Math.abs(Math.sin(Date.now() * 0.012)) * 30;
                 ctx.translate(0, -bounce);
             } else {
-                const sway = Math.sin(Date.now() * 0.006 + 1.5) * 0.05;
+                const sway = Math.sin(Date.now() * 0.006 + 1.5) * 0.04;
                 ctx.rotate(sway);
             }
 
+            // Sombra bajo el personaje
+            ctx.save();
+            ctx.scale(1, 0.3);
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+            ctx.beginPath();
+            ctx.arc(0, 30, this.width * 0.4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+
+            // Dibujar La Mugre orientada a la izquierda (scale -1) y 20% más grande
             if (imgToDraw && imgToDraw.complete && imgToDraw.naturalWidth > 0) {
                 ctx.scale(-1, 1);
                 ctx.drawImage(imgToDraw, -this.width / 2, -this.height + 25, this.width, this.height);
             } else {
                 ctx.fillStyle = '#4a3319';
-                ctx.fillRect(-40, -110, 80, 100);
+                ctx.fillRect(-50, -135, 100, 120);
                 ctx.fillStyle = '#2c1e0f';
                 ctx.beginPath();
-                ctx.arc(0, -135, 30, 0, Math.PI * 2);
+                ctx.arc(0, -165, 36, 0, Math.PI * 2);
                 ctx.fill();
             }
 
             ctx.restore();
         },
         update() {
-            this.crossbarX += (this.targetX - this.crossbarX) * 0.1;
-            this.x += (this.crossbarX - this.x) * 0.12;
+            this.x += (this.targetX - this.x) * 0.12;
 
             if (this.stateTimer > 0) {
                 this.stateTimer--;
@@ -686,15 +627,15 @@
             if (gameState === 'playing' && this.hp > 0) {
                 this.aiTimer++;
                 if (this.aiTimer % 55 === 0) {
-                    const randomDist = 180 + Math.random() * 120;
-                    this.targetX = Math.max(540, Math.min(1050, Puppet1.x + randomDist));
+                    const randomDist = 200 + Math.random() * 130;
+                    this.targetX = Math.max(540, Math.min(1060, Puppet1.x + randomDist));
                 }
 
-                if (this.aiTimer % 95 === 0 && Math.abs(Puppet1.x - this.x) < 280) {
+                if (this.aiTimer % 95 === 0 && Math.abs(Puppet1.x - this.x) < 320) {
                     AudioEngine.playHit();
-                    spawnHitParticles(this.x - 30, this.y - 70, '#5a3d28', 10);
+                    spawnHitParticles(this.x - 30, this.y - 80, '#5a3d28', 12);
                     Puppet1.takeDamage(13);
-                    spawnHitParticles(Puppet1.x, Puppet1.y - 70, '#ff416c', 12);
+                    spawnHitParticles(Puppet1.x, Puppet1.y - 80, '#ff416c', 14);
                 }
             }
         },
@@ -708,8 +649,8 @@
 
             if (this.hp <= 0) {
                 this.state = 'defeated';
-                spawnHitParticles(this.x, this.y - 90, '#5a3d28', 30);
-                spawnHitParticles(this.x, this.y - 90, '#00e5ff', 30);
+                spawnHitParticles(this.x, this.y - 100, '#5a3d28', 35);
+                spawnHitParticles(this.x, this.y - 100, '#00e5ff', 35);
                 endMatch(true); // Gana Fabulosín
             }
         }
@@ -720,9 +661,9 @@
         for (let i = 0; i < count; i++) {
             particles.push({
                 x, y,
-                vx: (Math.random() - 0.5) * 11,
-                vy: (Math.random() - 0.5) * 11,
-                radius: 3 + Math.random() * 4,
+                vx: (Math.random() - 0.5) * 12,
+                vy: (Math.random() - 0.5) * 12,
+                radius: 3 + Math.random() * 5,
                 color: color,
                 alpha: 1,
                 life: 1
@@ -731,12 +672,12 @@
     }
 
     function spawnAttackBurst(x, y) {
-        for (let i = 0; i < 24; i++) {
+        for (let i = 0; i < 26; i++) {
             particles.push({
                 x, y,
-                vx: 3 + Math.random() * 7,
-                vy: (Math.random() - 0.5) * 6,
-                radius: 4 + Math.random() * 5,
+                vx: 3 + Math.random() * 8,
+                vy: (Math.random() - 0.5) * 7,
+                radius: 4 + Math.random() * 6,
                 color: Math.random() > 0.4 ? '#00e5ff' : '#d1b3ff',
                 alpha: 1,
                 life: 0.95
@@ -767,7 +708,7 @@
         }
     }
 
-    // --- SECUENCIA DE CUENTA REGRESIVA ---
+    // --- CUENTA REGRESIVA ---
     function startCountdownSequence() {
         gameState = 'countdown';
         countdownValue = 3;
@@ -775,12 +716,10 @@
 
         Puppet1.x = 260;
         Puppet1.targetX = 260;
-        Puppet1.crossbarX = 260;
         Puppet1.state = 'idle';
 
         Puppet2.x = 940;
         Puppet2.targetX = 940;
-        Puppet2.crossbarX = 940;
         Puppet2.state = 'idle';
 
         AudioEngine.playCountdownPip();
@@ -845,7 +784,7 @@
         ctx.shadowBlur = 0;
         ctx.font = '700 22px Arial, sans-serif';
         ctx.fillStyle = '#ffffff';
-        ctx.fillText('¡PELLIZCA PARA MOVER • ABRE PARA GOLPEAR!', 0, 80);
+        ctx.fillText('¡PELLIZCA PARA MOVER • ABRE PARA ATACAR!', 0, 80);
 
         ctx.restore();
     }
@@ -867,7 +806,7 @@
             titleEl.style.color = '#ff416c';
             msgEl.textContent = 'Fabulosín ha caído. ¡Limpia la mugre en la revancha!';
             Puppet1.state = 'defeated';
-            Puppet2.state = 'laughing'; // La Mugre permanece riéndose
+            Puppet2.state = 'laughing'; // La Mugre permanece en el ring victoriosa
             AudioEngine.speak("¡La Mugre domina!");
         }
 
@@ -881,15 +820,13 @@
         Puppet1.state = 'idle';
         Puppet1.x = 280;
         Puppet1.targetX = 280;
-        Puppet1.crossbarX = 280;
 
         Puppet2.hp = 100;
         Puppet2.state = 'idle';
         Puppet2.x = 920;
         Puppet2.targetX = 920;
-        Puppet2.crossbarX = 920;
 
-        isHoldingStrings = false;
+        isPinchingControl = false;
         attackArmed = false;
 
         document.getElementById('p1-hp').style.width = '100%';
@@ -916,10 +853,10 @@
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             ctx.fillStyle = '#3e2723';
-            ctx.fillRect(80, 460, 1040, 190);
+            ctx.fillRect(80, 480, 1040, 180);
             ctx.strokeStyle = '#5d4037';
             ctx.lineWidth = 6;
-            ctx.strokeRect(80, 460, 1040, 190);
+            ctx.strokeRect(80, 480, 1040, 180);
         }
 
         Puppet1.update();
@@ -935,7 +872,7 @@
     }
     requestAnimationFrame(render);
 
-    // --- DETECCIÓN DE GESTOS: PELLIZCO = MOVER, ABRIR MANO = ATACAR ---
+    // --- DETECCIÓN DE GESTOS CON MEDIAPIPE (PELLIZCO = MOVER, ABRIR = ATACAR) ---
     function onHandResults(results) {
         pipCtx.save();
         pipCtx.clearRect(0, 0, pipCanvas.width, pipCanvas.height);
@@ -949,7 +886,7 @@
             const dyPinch = landmarks[4].y - landmarks[8].y;
             const pinchDist = Math.hypot(dxPinch, dyPinch);
 
-            // 2. Extensión de los dedos (para verificar mano abierta)
+            // 2. Extensión de dedos para mano abierta
             const dMiddle = Math.hypot(landmarks[12].x - landmarks[0].x, landmarks[12].y - landmarks[0].y);
             const dRing = Math.hypot(landmarks[16].x - landmarks[0].x, landmarks[16].y - landmarks[0].y);
             const dPinky = Math.hypot(landmarks[20].x - landmarks[0].x, landmarks[20].y - landmarks[0].y);
@@ -958,32 +895,29 @@
             const isOpenHand = pinchDist > 0.12 && dMiddle > 0.36 && dRing > 0.34 && dPinky > 0.30;
 
             if (isPinching) {
-                // ESTADO: SOSTENIENDO LA CRUCETA (PELLIZCO)
-                isHoldingStrings = true;
-                attackArmed = true; // Se arma el ataque para cuando abra la mano
+                // PELLIZCO: Control de movimiento activo
+                isPinchingControl = true;
+                attackArmed = true;
 
-                // SÓLO AQUÍ se actualiza la posición horizontal de Fabulosín
                 const pinchMidX = (landmarks[4].x + landmarks[8].x) / 2;
                 const handX = (1 - pinchMidX) * canvas.width;
                 Puppet1.targetX = Math.max(160, Math.min(1040, handX));
 
-                pipStatus.textContent = "🤏 SOSTENIENDO CRUCETA";
+                pipStatus.textContent = "🤏 MOVIENDO PERSONAJE";
                 pipStatus.style.color = "#00e5ff";
             } else if (isOpenHand) {
-                // ESTADO: MANO ABIERTA
-                isHoldingStrings = false;
+                // MANO ABIERTA: Liberar ataque
+                isPinchingControl = false;
 
-                // Si venía de pellizcar, soltó la cruceta con un ataque
                 if (attackArmed) {
                     Puppet1.triggerAttack();
-                    attackArmed = false; // Se consume el ataque
+                    attackArmed = false;
                 }
 
                 pipStatus.textContent = "🖐️ ¡ATAQUE FABULOSO!";
                 pipStatus.style.color = "#ff007f";
             } else {
-                // Mano en transición neutra / relajada: no mueve la cruceta
-                isHoldingStrings = false;
+                isPinchingControl = false;
                 pipStatus.textContent = "🖐️ PELLIZCA PARA MOVER";
                 pipStatus.style.color = "#ffeb3b";
             }
@@ -996,7 +930,6 @@
                 pipCtx.fill();
             }
 
-            // Indicador visual en el punto de contacto
             if (isPinching) {
                 pipCtx.strokeStyle = '#ffeb3b';
                 pipCtx.lineWidth = 2.5;
@@ -1005,7 +938,7 @@
                 pipCtx.stroke();
             }
         } else {
-            isHoldingStrings = false;
+            isPinchingControl = false;
             pipStatus.textContent = "BUSCANDO MANO...";
             pipStatus.style.color = "#aaa";
         }
@@ -1043,14 +976,13 @@
         AudioEngine.init();
         if (e.button === 0) {
             isMouseDown = true;
-            isHoldingStrings = true;
+            isPinchingControl = true;
             const rect = canvas.getBoundingClientRect();
             Puppet1.targetX = Math.max(160, Math.min(1040, ((e.clientX - rect.left) / rect.width) * canvas.width));
         }
     });
 
     window.addEventListener('mousemove', (e) => {
-        // Solo mueve al títere con mouse si está sosteniendo el clic (simulando pellizco)
         if (isMouseDown) {
             const rect = canvas.getBoundingClientRect();
             Puppet1.targetX = Math.max(160, Math.min(1040, ((e.clientX - rect.left) / rect.width) * canvas.width));
@@ -1060,8 +992,7 @@
     window.addEventListener('mouseup', (e) => {
         if (e.button === 0 && isMouseDown) {
             isMouseDown = false;
-            isHoldingStrings = false;
-            // Soltar el clic simula abrir la mano para lanzar el ataque
+            isPinchingControl = false;
             Puppet1.triggerAttack();
         }
     });
