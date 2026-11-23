@@ -115,12 +115,13 @@
     }
     .hud-top {
       position: absolute;
-      top: 15px;
+      top: 48px; /* Ajustado debajo del telón */
       left: 20px;
       right: 20px;
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
+      z-index: 20;
     }
     .fighter-card {
       display: flex;
@@ -185,7 +186,7 @@
     /* Combat & Victory Announcer */
     #announcer-text {
       position: absolute;
-      top: 36%;
+      top: 40%;
       left: 50%;
       transform: translate(-50%, -50%) scale(0);
       font-size: 52px;
@@ -364,6 +365,16 @@
 </head>
 <body>
 
+<!-- CONTENEDOR OCULTO DE IMÁGENES NATIVAS (CERO PROBLEMAS DE CARGA) -->
+<div style="display:none;">
+  <img id="raw-bg" src="Assets/background.png" data-file="background.png">
+  <img id="raw-fab-idle" src="Assets/fabulosin_idle.png" data-file="fabulosin_idle.png">
+  <img id="raw-fab-attack" src="Assets/fabulosin_attack.png" data-file="fabulosin_attack.png">
+  <img id="raw-fab-hurt" src="Assets/fabulosin_hurt.png" data-file="fabulosin_hurt.png">
+  <img id="raw-mugre-idle" src="Assets/mugre_idle.png" data-file="mugre_idle.png">
+  <img id="raw-mugre-hurt" src="Assets/mugre_hurt.png" data-file="mugre_hurt.png">
+</div>
+
 <div id="game-container">
   <div class="curtain-top"><div class="curtain-scallops"></div></div>
   <canvas id="gameCanvas" width="1000" height="650"></canvas>
@@ -469,44 +480,25 @@
 </div>
 
 <script>
-// --- CARGADOR CON RESPALDO DIRECTO DESDE TU GITHUB RAW ---
-// Garantiza que SIEMPRE cargue tus fotos reales tanto en GitHub Pages como al abrir el archivo en tu máquina
-const GITHUB_RAW_BASE = 'https://raw.githubusercontent.com/ElJust-in/FabulosinTitere/main/Assets/';
+// --- ENLACE A LOS ELEMENTOS DE IMAGEN ---
+const GITHUB_BACKUP_BASE = 'https://raw.githubusercontent.com/ElJust-in/FabulosinTitere/main/Assets/';
 
-const SPRITE_NAMES = {
-  background: 'background.png',
-  fabulosin_idle: 'fabulosin_idle.png',
-  fabulosin_attack: 'fabulosin_attack.png',
-  fabulosin_hurt: 'fabulosin_hurt.png',
-  mugre_idle: 'mugre_idle.png',
-  mugre_hurt: 'mugre_hurt.png'
+const spriteMap = {
+  background: document.getElementById('raw-bg'),
+  fabulosin_idle: document.getElementById('raw-fab-idle'),
+  fabulosin_attack: document.getElementById('raw-fab-attack'),
+  fabulosin_hurt: document.getElementById('raw-fab-hurt'),
+  mugre_idle: document.getElementById('raw-mugre-idle'),
+  mugre_hurt: document.getElementById('raw-mugre-hurt')
 };
 
-const loadedSprites = {};
-
-Object.entries(SPRITE_NAMES).forEach(([key, filename]) => {
-  const img = new Image();
-  img.crossOrigin = 'anonymous';
-
-  // Intento 1: Ruta local Assets/
-  img.src = 'Assets/' + filename;
-
-  img.onload = () => {
-    loadedSprites[key] = img;
-    console.log(`[Sprites] Cargado local: Assets/${filename}`);
-  };
-
-  img.onerror = () => {
-    // Intento 2 (Garantizado): Cargar directo de tu repositorio público en GitHub
-    console.warn(`[Sprites] Descargando desde GitHub Raw: ${filename}`);
-    const remoteImg = new Image();
-    remoteImg.crossOrigin = 'anonymous';
-    remoteImg.src = GITHUB_RAW_BASE + filename;
-    remoteImg.onload = () => {
-      loadedSprites[key] = remoteImg;
-      console.log(`[Sprites] Cargado desde GitHub: ${filename}`);
-    };
-  };
+// Auto-fallback en caso de que alguna ruta relativa falle en local
+Object.values(spriteMap).forEach((imgEl) => {
+  imgEl.addEventListener('error', () => {
+    const file = imgEl.getAttribute('data-file');
+    console.warn('Cargando respaldo GitHub:', file);
+    imgEl.src = GITHUB_BACKUP_BASE + file;
+  });
 });
 
 // --- AUDIO & VOICE SYNTH ---
@@ -798,7 +790,7 @@ class Marionette {
       ctx.filter = 'brightness(2) saturate(0.5)';
     }
 
-    let spriteKey = null;
+    let spriteKey = 'fabulosin_idle';
     if (this.isPlayer) {
       if (this.hitStun > 0) spriteKey = 'fabulosin_hurt';
       else if (this.isAttacking) spriteKey = 'fabulosin_attack';
@@ -808,14 +800,12 @@ class Marionette {
       else spriteKey = 'mugre_idle';
     }
 
-    const sprite = loadedSprites[spriteKey];
-    if (sprite && sprite.complete && sprite.naturalWidth > 0) {
-      // Dibuja la foto real con su proporción natural
+    const sprite = spriteMap[spriteKey];
+    if (sprite && sprite.naturalWidth > 0) {
       const sprW = 180;
       const sprH = (sprite.naturalHeight / sprite.naturalWidth) * sprW;
       ctx.drawImage(sprite, -sprW / 2, -sprH + 20, sprW, sprH);
     } else {
-      // Bloque temporal solo mientras termina de bajar la imagen
       ctx.fillStyle = this.isPlayer ? '#9333ea' : '#451a03';
       ctx.fillRect(-25, -90, 50, 75);
     }
@@ -1023,14 +1013,12 @@ canvas.addEventListener('mousedown', () => {
 
 // Scene Draw
 function drawScenery() {
-  const bgImg = loadedSprites['background'];
-  if (bgImg && bgImg.complete && bgImg.naturalWidth > 0) {
+  const bgImg = spriteMap['background'];
+  if (bgImg && bgImg.naturalWidth > 0) {
     ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
   } else {
     ctx.fillStyle = '#2d144b';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#e2e8f0';
-    ctx.fillRect(100, RING_Y, 800, 100);
   }
 
   if (inCalibrationMode) {
@@ -1059,14 +1047,16 @@ function updateEnemyAI() {
   }
 }
 
+let announcerTimeout = null;
 const announcerEl = document.getElementById('announcer-text');
 function showAnnouncer(text, duration = 1500, isVictory = false) {
+  if (announcerTimeout) clearTimeout(announcerTimeout);
   announcerEl.textContent = text;
   if (isVictory) announcerEl.classList.add('victory-phrase');
   else announcerEl.classList.remove('victory-phrase');
 
   announcerEl.classList.add('show');
-  setTimeout(() => {
+  announcerTimeout = setTimeout(() => {
     announcerEl.classList.remove('show');
     announcerEl.classList.remove('victory-phrase');
   }, duration);
